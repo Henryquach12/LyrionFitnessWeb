@@ -1,0 +1,29 @@
+ <!DOCTYPE html>
+<html>
+<head>
+    <title>LyrionFitness</title>
+</head>
+<body>
+    <h1>LyrionFitness</h1>
+    <p>Frontend is working!</p>
+
+    <button onclick="testAPI()">Test Backend</button>
+
+    <p id="result"></p>
+
+    <script>
+        async function testAPI() {
+            const result = document.getElementById("result");
+
+            try {
+                const response = await fetch("https://YOUR-RENDER-APP.onrender.com/health");
+                const data = await response.text();
+
+                result.textContent = "Backend: " + data;
+            } catch (error) {
+                result.textContent = "Backend connection failed";
+            }
+        }
+    </script>
+</body>
+</html>
