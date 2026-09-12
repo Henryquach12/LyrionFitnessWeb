@@ -1,29 +1,230 @@
- <!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="vi">
 <head>
-    <title>LyrionFitness</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#16131F">
+  <meta name="description" content="LyrionFitness kết hợp kế hoạch tập gym thích ứng và theo dõi calo, macro theo mục tiêu của bạn. Sắp có trên App Store.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="LyrionFitness — Một kế hoạch. Dành riêng cho bạn.">
+  <meta property="og:description" content="Tập luyện và dinh dưỡng, được thiết kế theo mục tiêu và nhịp sống của bạn. Sắp ra mắt trên iPhone.">
+  <meta property="og:image" content="assets/lyrion-hero.png">
+  <title>LyrionFitness — Tập luyện theo cách của bạn</title>
+  <link rel="icon" type="image/png" href="assets/lyrion-icon.png">
+  <link rel="preload" href="assets/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/Roboto.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/lyrion-mark.png" as="image" fetchpriority="high">
+  <link rel="preload" href="intro.js" as="script">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="intro.css">
+  <script src="config.js" defer></script>
+  <script src="previews.js" defer></script>
+  <script src="script.js" defer></script>
+  <script src="motion.js" defer></script>
+  <script src="reviews.js" defer></script>
+  <script src="waitlist.js" defer></script>
+<noscript><style>.preview-trigger{cursor:default}.preview-open{display:none}.site-nav{display:flex!important}.menu-toggle{display:none!important}.intelligence-tabs{display:none}.algorithm-panel[hidden]{display:block!important;margin-top:15px}</style></noscript>
 </head>
 <body>
-    <h1>LyrionFitness</h1>
-    <p>Frontend is working!</p>
+  <dialog class="page-intro" aria-label="LyrionFitness" aria-describedby="page-intro-status">
+    <img class="page-intro-logo" src="assets/lyrion-mark.png" alt="" width="350" height="383" fetchpriority="high">
+    <p class="sr-only" id="page-intro-status">Đang mở LyrionFitness.</p>
+  </dialog>
+  <script src="intro.js"></script>
+  <a class="skip-link" href="#main">Đến nội dung chính</a>
+  <header class="site-header wrap">
+    <a class="brand" href="#top" aria-label="LyrionFitness, về đầu trang">
+      <img src="assets/lyrion-icon.png" alt="" width="40" height="40">
+      <span>Lyrion<span class="brand-light">Fitness</span></span>
+    </a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu <span class="menu-lines" aria-hidden="true"></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Điều hướng chính">
+      <a href="#features">Tính năng</a>
+      <a href="#intelligence">Cá nhân hóa</a>
+      <a href="#reviews">Đánh giá</a>
+    </nav>
+  </header>
 
-    <button onclick="testAPI()">Test Backend</button>
+  <main id="main">
+    <section class="hero wrap" id="top" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">TẬP LUYỆN & DINH DƯỠNG</p>
+        <h1 id="hero-title">Một kế hoạch.<br><span>Dành riêng cho bạn.</span></h1>
+        <p class="hero-description">Kế hoạch tập thích ứng. Calo được theo dõi.<br class="desktop-break"> Tất cả bắt đầu từ mục tiêu của bạn.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#features">Khám phá Lyrion</a>
+          <a class="quiet-link" href="#download">Sắp có trên App Store</a>
+        </div>
+        <p class="hero-footnote">Tập có định hướng. Ăn theo mục tiêu. Tiến bộ theo bạn.</p>
+      </div>
+      <div class="hero-visual" role="img" aria-label="Minh họa ứng dụng LyrionFitness trên iPhone, với kế hoạch tập và theo dõi calo">
+        <div class="hero-phones">
+          <div class="device hero-phone hero-phone-back" aria-hidden="true"><div class="device-screen" data-preview="nutrition"></div></div>
+          <div class="device hero-phone hero-phone-front" aria-hidden="true"><div class="device-screen" data-preview="welcome"></div></div>
+        </div>
+      </div>
+    </section>
 
-    <p id="result"></p>
+    <section class="features section wrap" id="features" aria-labelledby="features-title">
+      <div class="section-heading reveal">
+        <div><p class="eyebrow">MỘT ỨNG DỤNG. TRỌN HÀNH TRÌNH.</p><h2 id="features-title">Bớt phỏng đoán.<br><span>Thêm định hướng.</span></h2></div>
+        <p>Từ buổi tập đầu tiên đến những thói quen lâu dài. Lyrion kết nối kế hoạch tập, dinh dưỡng và tiến độ của bạn.</p>
+      </div>
+      <div class="preview-grid">
+        <article class="preview-card reveal">
+          <button type="button" class="preview-trigger" data-open-preview="welcome" aria-label="Xem lớn màn hình kế hoạch cá nhân hóa">
+            <span class="device"><span class="device-screen" data-preview="welcome" aria-hidden="true"></span></span>
+            <span class="preview-open">Xem màn hình</span>
+          </button>
+          <div class="preview-copy"><span class="feature-index">CÁ NHÂN HÓA</span><h3>Bắt đầu từ chính bạn.</h3><p>Mục tiêu, kinh nghiệm, lịch trình và thiết bị của bạn tạo nên một kế hoạch riêng.</p></div>
+        </article>
+        <article class="preview-card reveal">
+          <button type="button" class="preview-trigger" data-open-preview="workout" aria-label="Xem lớn màn hình kế hoạch tập gym">
+            <span class="device"><span class="device-screen" data-preview="workout" aria-hidden="true"></span></span>
+            <span class="preview-open">Xem màn hình</span>
+          </button>
+          <div class="preview-copy"><span class="feature-index">TẬP LUYỆN</span><h3>Đến phòng tập. Biết cần làm gì.</h3><p>Lộ trình rõ ràng, video hướng dẫn và gợi ý tăng tạ, tăng reps theo từng buổi.</p></div>
+        </article>
+        <article class="preview-card reveal">
+          <button type="button" class="preview-trigger" data-open-preview="nutrition" aria-label="Xem lớn màn hình theo dõi calo và macro">
+            <span class="device"><span class="device-screen" data-preview="nutrition" aria-hidden="true"></span></span>
+            <span class="preview-open">Xem màn hình</span>
+          </button>
+          <div class="preview-copy"><span class="feature-index">DINH DƯỠNG</span><h3>Hiểu bữa ăn của mình.</h3><p>Ghi calo và macro bằng ảnh, nhãn dinh dưỡng, văn bản hoặc giọng nói.</p></div>
+        </article>
+        <article class="preview-card reveal">
+          <button type="button" class="preview-trigger" data-open-preview="progress" aria-label="Xem lớn màn hình tiến độ và chuỗi tuần tập">
+            <span class="device"><span class="device-screen" data-preview="progress" aria-hidden="true"></span></span>
+            <span class="preview-open">Xem màn hình</span>
+          </button>
+          <div class="preview-copy"><span class="feature-index">TIẾN ĐỘ</span><h3>Mỗi tuần đều có ý nghĩa.</h3><p>Theo dõi khối lượng tập, phục hồi và chuỗi tuần duy trì. Nhìn lại để bước tiếp.</p></div>
+        </article>
+      </div>
+    </section>
 
-    <script>
-        async function testAPI() {
-            const result = document.getElementById("result");
+    <section class="intelligence section wrap" id="intelligence" aria-labelledby="intelligence-title">
+      <div class="intelligence-copy reveal">
+        <p class="eyebrow">KHÔNG DỪNG Ở MỘT LỊCH TẬP</p>
+        <h2 id="intelligence-title">Bạn thay đổi.<br><span>Kế hoạch cũng vậy.</span></h2>
+        <p>Bên dưới giao diện là một hệ thống tính toán. Lyrion dùng những gì bạn ghi lại để gợi ý bước tiếp theo, từ mức tạ đến lúc cần một tuần nhẹ hơn.</p>
+        <div class="intelligence-tabs" role="tablist" aria-label="Khám phá cách Lyrion cá nhân hóa">
+          <button id="tab-adapt" role="tab" aria-selected="true" aria-controls="panel-adapt" data-tab="adapt">Thích ứng với bạn</button>
+          <button id="tab-balance" role="tab" aria-selected="false" aria-controls="panel-balance" tabindex="-1" data-tab="balance">Cân bằng nhóm cơ</button>
+          <button id="tab-freedom" role="tab" aria-selected="false" aria-controls="panel-freedom" tabindex="-1" data-tab="freedom">Tự do điều chỉnh</button>
+        </div>
+        <p class="algorithm-note">Kế hoạch được điều chỉnh theo mục tiêu, kinh nghiệm và điều kiện tập luyện của từng người.</p>
+      </div>
+      <div class="algorithm-stage reveal">
+        <div id="panel-adapt" class="algorithm-panel" role="tabpanel" aria-labelledby="tab-adapt" tabindex="0">
+          <div class="panel-top"><span>TIẾN BỘ CÓ CƠ SỞ</span><span class="mini-label">Progressive overload</span></div>
+          <h3>Buổi tập hôm nay.<br>Cơ sở cho lần tiếp theo.</h3>
+          <div class="training-example"><span>Đẩy ngực với thanh đòn</span></div>
+          <div class="set-table" role="table" aria-label="Ví dụ kết quả tập">
+            <div class="set-table-row set-table-head" role="row"><span role="columnheader">HIỆP</span><span role="columnheader">MỨC TẠ</span><span role="columnheader">SỐ REPS</span></div>
+            <div class="set-table-row" role="row"><span role="cell">01</span><span role="cell">40 <small>kg</small></span><span role="cell">12 <small>/ 12</small></span></div>
+            <div class="set-table-row" role="row"><span role="cell">02</span><span role="cell">40 <small>kg</small></span><span role="cell">12 <small>/ 12</small></span></div>
+            <div class="set-table-row" role="row"><span role="cell">03</span><span role="cell">40 <small>kg</small></span><span role="cell">12 <small>/ 12</small></span></div>
+          </div>
+          <div class="next-step"><span>GỢI Ý CHO BUỔI SAU</span><strong>Sẵn sàng thử mức tạ tiếp theo.</strong><p>Khi mọi hiệp đều chạm đầu trên của khoảng reps, Lyrion gợi ý tăng tạ phù hợp.</p></div>
+          <p class="panel-caption">Chưa đạt? Giữ mức tạ, tiến bộ qua từng rep.</p>
+        </div>
+        <div id="panel-balance" class="algorithm-panel" role="tabpanel" aria-labelledby="tab-balance" tabindex="0" hidden>
+          <div class="panel-top"><span>MỖI HIỆP ĐỀU ĐƯỢC TÍNH</span><span class="mini-label">Plan balancer</span></div>
+          <h3>Một bài tập.<br>Nhiều nhóm cơ cùng tham gia.</h3>
+          <div class="effective-sets"><span>4 hiệp bench press</span><strong>4 <small>hiệp ngực</small><span>+</span>1,6 <small>hiệp vai trước hiệu dụng</small></strong></div>
+          <p class="panel-description">Ví dụ cách hệ thống phân bổ đóng góp của một bài tập cho các nhóm cơ liên quan.</p>
+          <div class="next-step"><span>HIỂU RÕ TRƯỚC KHI ĐỔI</span><strong>Nhìn thấy sự cân bằng của kế hoạch.</strong><p>Kiểm tra khối lượng theo nhóm cơ và khoảng tập phù hợp khi bạn thêm hoặc thay bài.</p></div>
+        </div>
+        <div id="panel-freedom" class="algorithm-panel" role="tabpanel" aria-labelledby="tab-freedom" tabindex="0" hidden>
+          <div class="panel-top"><span>KẾ HOẠCH NÀY LÀ CỦA BẠN</span><span class="mini-label">Your plan</span></div>
+          <h3>Linh hoạt với lịch sống.<br>Rõ ràng trong từng lựa chọn.</h3>
+          <ol class="freedom-steps"><li><strong>Chọn bài tập phù hợp</strong><p>Tìm trong thư viện bài tập có dụng cụ và không dụng cụ.</p></li><li><strong>Xem trước khi thay</strong><p>Xem động tác và nhóm cơ tác động trước khi đưa vào lịch tập.</p></li><li><strong>Mang lộ trình theo bạn</strong><p>Kế hoạch tập được thiết kế để theo dõi cả khi không có kết nối.</p></li></ol>
+          <p class="panel-caption">Video và tính năng AI có thể cần kết nối mạng.</p>
+        </div>
+      </div>
+    </section>
 
-            try {
-                const response = await fetch("https://YOUR-RENDER-APP.onrender.com/health");
-                const data = await response.text();
+    <section class="waitlist section wrap" id="waitlist" aria-labelledby="waitlist-title">
+      <div class="waitlist-copy reveal">
+        <p class="eyebrow">SẮP GẶP NHAU TRÊN IPHONE</p>
+        <h2 id="waitlist-title">Hành trình của bạn.<br><span>Bắt đầu cùng Lyrion.</span></h2>
+        <p>Để lại tên và email để nhận tin khi LyrionFitness ra mắt. Một nơi cho kế hoạch tập, bữa ăn và từng bước tiến của bạn.</p>
+        <p class="waitlist-note">Chỉ một lời nhắn khi mọi thứ sẵn sàng.</p>
+      </div>
+      <div class="waitlist-board reveal">
+        <p class="board-eyebrow">LYRIONFITNESS · WAITLIST</p>
+        <h3>Hẹn bạn ngày ra mắt.</h3>
+        <p class="board-description">Đăng ký nhận thông báo sớm nhất.</p>
+        <form id="waitlist-form" action="/api/waitlist" method="post">
+          <fieldset class="waitlist-fields">
+            <legend class="sr-only">Thông tin đăng ký</legend>
+            <div class="form-field"><label for="waitlist-name">Tên của bạn</label><input id="waitlist-name" name="name" type="text" autocomplete="name" minlength="2" maxlength="100" required placeholder="Bạn muốn Lyrion gọi mình là gì?"></div>
+            <div class="form-field"><label for="waitlist-email">Địa chỉ email</label><input id="waitlist-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="ban@email.com"></div>
+            <div class="form-trap" aria-hidden="true"><label for="waitlist-company">Để trống trường này</label><input id="waitlist-company" name="company" type="text" tabindex="-1" autocomplete="off"></div>
+            <button class="waitlist-submit" type="submit">Tham gia danh sách chờ</button>
+          </fieldset>
+          <p class="form-status" id="waitlist-status" role="status" aria-live="polite" aria-atomic="true"></p>
+          <p class="form-note">Bằng việc đăng ký, bạn đồng ý nhận email thông báo ra mắt từ LyrionFitness.</p>
+        </form>
+        <noscript><p class="form-note">Vui lòng bật JavaScript để đăng ký.</p></noscript>
+      </div>
+    </section>
 
-                result.textContent = "Backend: " + data;
-            } catch (error) {
-                result.textContent = "Backend connection failed";
-            }
-        }
-    </script>
+    <section class="reviews section" id="reviews" aria-labelledby="reviews-title">
+      <div class="reviews-heading wrap">
+        <div><p class="eyebrow">NHỮNG NHỊP SỐNG KHÁC NHAU</p><h2 id="reviews-title">Một kế hoạch riêng.<br><span>Vừa với cuộc sống.</span></h2></div>
+        <div class="reviews-controls"><span class="review-counter" aria-hidden="true">01 / 04</span><button class="reviews-next" type="button" aria-label="Xem nhận xét tiếp theo" aria-controls="review-group" hidden><span aria-hidden="true">→</span></button></div>
+      </div>
+      <div class="review-window wrap" role="region" aria-roledescription="băng chuyền" aria-label="Nhận xét">
+          <div class="review-group" id="review-group">
+            <article class="review-card" data-review="0">
+              <blockquote><p>Tui đã sử dụng app được 1 tuần và cảm thấy rất phù hợp với thời gian biểu bận rộn của tui mà các bài tập lại rất hợp lý</p><footer><span class="avatar" aria-hidden="true">MT</span><span><strong>Minh Thư</strong><span>27 tuổi, nhân viên văn phòng</span></span></footer></blockquote>
+            </article>
+            <article class="review-card" data-review="1">
+              <blockquote><p>Đi làm về là tui mở lịch lên tập luôn. Có sẵn bài tập với số hiệp nên đỡ mất thời gian nghĩ hôm nay tập gì.</p><footer><span class="avatar" aria-hidden="true">HN</span><span><strong>Hoàng Nam</strong><span>29 tuổi, nhân viên văn phòng</span></span></footer></blockquote>
+            </article>
+            <article class="review-card" data-review="2">
+              <blockquote><p>Tui thích ghi lại bữa ăn rồi xem calo với macro ngay trong cùng một app. Dễ nhìn lại thói quen của mình hơn.</p><footer><span class="avatar" aria-hidden="true">GH</span><span><strong>Gia Hân</strong><span>24 tuổi, người mới tập gym</span></span></footer></blockquote>
+            </article>
+            <article class="review-card" data-review="3" hidden>
+              <blockquote><p>Có tuần bận thì tui đổi lại lịch tập. Nhìn được tiến độ qua từng tuần khiến tui muốn duy trì đều hơn.</p><footer><span class="avatar" aria-hidden="true">AK</span><span><strong>An Khang</strong><span>Tập luyện theo lịch linh hoạt</span></span></footer></blockquote>
+            </article>
+          </div>
+      </div>
+      <p class="sr-only" data-review-status role="status" aria-live="polite" aria-atomic="true">Đang hiển thị nhận xét 1, 2, 3 trên 4.</p>
+    </section>
+
+    <section class="faq section wrap" aria-labelledby="faq-title">
+      <div class="reveal"><p class="eyebrow">TRƯỚC KHI BẮT ĐẦU</p><h2 id="faq-title">Có thể bạn<br><span>đang thắc mắc.</span></h2></div>
+      <div class="faq-items reveal">
+        <details><summary>Lyrion đã có trên App Store chưa?<span class="faq-plus" aria-hidden="true"></span></summary><p data-release-answer>LyrionFitness đang chuẩn bị ra mắt trên App Store. Liên kết tải ứng dụng sẽ được cập nhật ngay tại trang này khi có bản phát hành.</p></details>
+        <details><summary>Tôi có thể tự thay đổi kế hoạch tập không?<span class="faq-plus" aria-hidden="true"></span></summary><p>Có. Bạn có thể chọn lại bài tập theo dụng cụ và sở thích. Bộ cân bằng kế hoạch giúp bạn xem thay đổi ảnh hưởng thế nào đến khối lượng tập của từng nhóm cơ.</p></details>
+        <details><summary>AI theo dõi calo như thế nào?<span class="faq-plus" aria-hidden="true"></span></summary><p>Bạn có thể dùng ảnh món ăn, quét nhãn dinh dưỡng, nhập văn bản hoặc giọng nói. Kết quả nhận diện bằng AI là ước tính; bạn có thể kiểm tra và chỉnh lại khẩu phần trước khi lưu.</p></details>
+        <details><summary>Tôi có thể dùng khi không có mạng không?<span class="faq-plus" aria-hidden="true"></span></summary><p>Lộ trình tập được thiết kế để sử dụng offline. Các tính năng cần xử lý AI hoặc tải video có thể yêu cầu kết nối mạng.</p></details>
+      </div>
+    </section>
+
+    <section class="download wrap" id="download" aria-labelledby="download-title">
+      <img class="download-icon" src="assets/lyrion-icon.png" alt="Biểu tượng ứng dụng LyrionFitness" width="80" height="80" loading="lazy">
+      <p class="eyebrow">LYRIONFITNESS CHO IPHONE</p>
+      <h2 id="download-title">Một khởi đầu mới.<br><span>Một phiên bản của chính bạn.</span></h2>
+      <p>Tập luyện và dinh dưỡng, theo nhịp sống của bạn.</p>
+      <a class="button primary store-button" data-store-link role="link" aria-disabled="true"><span data-store-label>Sắp có trên App Store</span></a>
+      <p class="release-note" data-release-note>Đang chuẩn bị ra mắt. Hẹn gặp bạn trên iPhone.</p>
+      <p class="launch-offer" data-launch-offer hidden></p>
+    </section>
+  </main>
+
+  <footer class="site-footer wrap">
+    <a class="brand" href="#top" aria-label="LyrionFitness, về đầu trang"><img src="assets/lyrion-mark.png" alt="" width="26" height="29"><span>Lyrion<span class="brand-light">Fitness</span></span></a>
+    <p>Được thiết kế cho hành trình của bạn.</p>
+    <span>© <span data-year>2026</span> LyrionFitness</span>
+  </footer>
+
+  <dialog class="preview-dialog" aria-labelledby="preview-dialog-title">
+    <div class="dialog-heading"><span id="preview-dialog-title">Kế hoạch của bạn</span><button class="dialog-close" type="button" aria-label="Đóng màn hình phóng to">Đóng <span aria-hidden="true">×</span></button></div>
+    <div class="dialog-preview"><div class="device"><div class="device-screen" id="dialog-screen"></div></div></div>
+    <div class="dialog-controls"><button type="button" data-preview-prev aria-label="Màn hình trước">←</button><p><span data-preview-count>1 / 4</span></p><button type="button" data-preview-next aria-label="Màn hình tiếp theo">→</button></div>
+  </dialog>
 </body>
 </html>

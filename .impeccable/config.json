@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-09-12T07:15:23.654Z",
+        "reason": "Brand spec in user's brief (theme Apex): '--text-bright: large headings and large numbers, with a subtle --core glow' and 'Primary button ... with a subtle --core glow'; the --core (#B79BFF) glow is the mandated brand look for this page"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "style.css"
+        ],
+        "createdAt": "2026-09-12T07:15:23.839Z",
+        "reason": "Same brand-spec exception as index.html: --core glow on headings, large numbers and primary button is required by the user's Apex theme brief"
+      }
+    ]
+  }
+}

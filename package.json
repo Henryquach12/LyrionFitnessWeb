@@ -1,0 +1,15 @@
+{
+  "name": "lyrion-fitness-landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LyrionFitness launch page with a server-side Supabase waitlist. No runtime dependencies.",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check intro.js && node --check script.js && node --check motion.js && node --check previews.js && node --check config.js && node --check reviews.js && node --check waitlist.js && node --check waitlist-api.mjs && node --check server.mjs",
+    "test:browser": "node tools/verify.mjs",
+    "test:api": "node --test tools/waitlist.test.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

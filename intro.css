@@ -1,0 +1,32 @@
+/* Keep the existing scrollbar space while the intro temporarily locks scrolling. */
+html{scrollbar-gutter:stable}
+html.intro-active{overflow:hidden}
+
+.page-intro{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100%;
+  max-width:none;
+  max-height:none;
+  margin:0;
+  padding:32px;
+  border:0;
+  outline:none;
+  background:var(--crest);
+  color:var(--text-bright);
+  overflow:hidden;
+  touch-action:none;
+}
+.page-intro[open]{display:grid;place-items:center}
+.page-intro::backdrop{background:transparent}
+.page-intro-logo{width:clamp(88px,10vw,128px);height:auto;object-fit:contain}
+
+/* The full-opacity hold is exactly 3 seconds; only then does the exit begin. */
+.page-intro.is-ready{animation:page-intro-exit 500ms var(--ease-out) 3000ms forwards}
+@keyframes page-intro-exit{from{opacity:1}to{opacity:0}}
+
+@media(prefers-reduced-motion:reduce){
+  /* Preserve this brief opacity fade over the site's blanket motion reset. */
+  .page-intro.is-ready{animation:page-intro-exit 160ms var(--ease-out) 840ms forwards !important}
+}
