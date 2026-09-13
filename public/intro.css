@@ -26,7 +26,19 @@ html.intro-active{overflow:hidden}
 .page-intro.is-ready{animation:page-intro-exit 500ms var(--ease-out) 3000ms forwards}
 @keyframes page-intro-exit{from{opacity:1}to{opacity:0}}
 
+/* A separate transform layer leaves scroll scaling and phone hover intact. */
+.hero-entrance{position:absolute;inset:0;transform-origin:50% 90%}
+html.hero-entrance-pending .hero-entrance{transform:scale(.72);opacity:.7}
+html.hero-entrance-running .hero-entrance{animation:hero-entrance-scale 2400ms var(--ease-out) both}
+@keyframes hero-entrance-scale{
+  from{transform:scale(.72);opacity:.7}
+  to{transform:scale(1);opacity:1}
+}
+
 @media(prefers-reduced-motion:reduce){
   /* Preserve this brief opacity fade over the site's blanket motion reset. */
-  .page-intro.is-ready{animation:page-intro-exit 160ms var(--ease-out) 840ms forwards !important}
+  .page-intro.is-ready{animation:page-intro-exit 160ms var(--ease-out) 3000ms forwards !important}
+  html.hero-entrance-pending .hero-entrance{transform:none;opacity:.65}
+  html.hero-entrance-running .hero-entrance{animation:hero-entrance-fade 200ms var(--ease-out) both !important}
 }
+@keyframes hero-entrance-fade{from{opacity:.65}to{opacity:1}}

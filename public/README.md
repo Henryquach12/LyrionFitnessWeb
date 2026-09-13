@@ -111,7 +111,7 @@ Hosting thuần tĩnh chỉ hiển thị giao diện; cần triển khai API Nod
 
 ## Font và chuyển động
 
-Trang dùng Roboto; màn hình app minh họa giữ Inter. Font được lưu cục bộ trong `assets/` kèm giấy phép SIL Open Font License. Khách truy cập không phải tải font từ Google.
+Trang và màn hình app minh họa dùng Be Vietnam Pro, với các độ đậm 400, 500, 600 và 700 được lưu cục bộ trong `assets/`. Khách truy cập không phải tải font từ Google.
 
 Hero ở đầu trang, hai ảnh phóng 7,5% từ điểm neo phía dưới rồi về tỷ lệ gốc khi cuộn xuống. Trở về đầu trang sẽ khôi phục tỷ lệ lớn. Hover ảnh nhấc nhẹ lên trong 250 ms với `--ease-out` có sẵn.
 

@@ -1,13 +1,34 @@
-```css
 @font-face{
-  font-family:"Roboto";
-  src:url("assets/Roboto.ttf") format("truetype");
+  font-family:"Be Vietnam Pro";
+  src:url("assets/BeVietnamPro-Regular.ttf") format("truetype");
   font-style:normal;
-  font-weight:100 900;
+  font-weight:400;
+  font-display:swap;
+}
+@font-face{
+  font-family:"Be Vietnam Pro";
+  src:url("assets/BeVietnamPro-Medium.ttf") format("truetype");
+  font-style:normal;
+  font-weight:500;
+  font-display:swap;
+}
+@font-face{
+  font-family:"Be Vietnam Pro";
+  src:url("assets/BeVietnamPro-SemiBold.ttf") format("truetype");
+  font-style:normal;
+  font-weight:600;
+  font-display:swap;
+}
+@font-face{
+  font-family:"Be Vietnam Pro";
+  src:url("assets/BeVietnamPro-Bold.ttf") format("truetype");
+  font-style:normal;
+  font-weight:700;
   font-display:swap;
 }
 
 :root{
+  --font-sans:"Be Vietnam Pro",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --core:#B79BFF;
   --crest:#262136;
   --haze:#16131F;
@@ -30,10 +51,16 @@ html{
   scroll-behavior:smooth;
   scroll-padding-top:120px;
   color-scheme:dark;
+  min-height:100%;
+  background:var(--crest);
 }
 
 body{
   margin:0;
+  min-height:100svh;
+  /* Keep content in its original safe region while the background reaches every edge. */
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
   background:linear-gradient(
     180deg,
     var(--crest) 0%,
@@ -42,7 +69,7 @@ body{
     var(--abyss) 100%
   );
   color:var(--text);
-  font-family:"Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-family:var(--font-sans);
   font-size:16px;
   line-height:1.65;
   -webkit-font-smoothing:antialiased;
@@ -221,6 +248,8 @@ p{
 .site-nav a:hover{
   color:var(--text-bright);
 }
+
+.site-nav .desktop-nav-only{display:none}
 
 .header-cta{
   font-size:12px;
@@ -606,8 +635,11 @@ p{
 .algorithm-stage{
   border-radius:var(--radius-lg);
   padding:6px;
-  background:rgba(183,155,255,.025);
+  background:rgba(38,33,54,.58);
   border:1px solid var(--hairline);
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+  box-shadow:0 18px 44px rgba(5,5,8,.14),inset 0 1px 0 rgba(255,255,255,.05);
 }
 
 .algorithm-panel{
@@ -1070,7 +1102,9 @@ details>p{
   border:1px solid rgba(183,155,255,.24);
   border-radius:var(--radius-lg);
   color:var(--text);
-  background:linear-gradient(145deg,#262136,#100d18);
+  background:rgba(27,23,38,.9);
+  -webkit-backdrop-filter:blur(24px);
+  backdrop-filter:blur(24px);
   box-shadow:0 25px 90px rgba(0,0,0,.5);
 }
 
@@ -1157,7 +1191,7 @@ details>p{
   flex-direction:column;
   height:100%;
   color:var(--text);
-  font-family:"Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-family:var(--font-sans);
   font-size:11px;
   line-height:1.45;
   font-variant-numeric:tabular-nums;
@@ -1690,30 +1724,21 @@ details>p{
 
 /* Reviews */
 .reviews{
-  --text:#17151b;
-  --text-bright:#111;
-  --secondary:#55515b;
-  --caption:#66616c;
-  --core:#19161e;
-  --hairline:rgba(23,21,27,.1);
   position:relative;
   isolation:isolate;
   margin:50px 24px;
   padding-block:88px 64px;
-  border-radius:40px;
-  background:#fff;
-  color:var(--text);
-  color-scheme:light;
+  background:transparent;
 }
 
 .reviews h2,
 .reviews h2 span{
-  color:#111;
+  color:#fff;
   text-shadow:none;
 }
 
 .reviews .eyebrow{
-  color:#4a454f;
+  color:#fff;
 }
 
 .reviews-heading{
@@ -1736,7 +1761,7 @@ details>p{
   font-size:12px;
   font-variant-numeric:tabular-nums;
   letter-spacing:.08em;
-  color:var(--secondary);
+  color:rgba(255,255,255,.76);
 }
 
 .reviews-next{
@@ -1744,10 +1769,13 @@ details>p{
   place-items:center;
   width:50px;
   height:50px;
-  border:1px solid #19161e;
+  border:1px solid rgba(255,255,255,.24);
   border-radius:50%;
   color:#fff;
-  background:#19161e;
+  background:rgba(255,255,255,.1);
+  box-shadow:0 8px 24px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.08);
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
   font-size:24px;
   transition:
     background 180ms ease,
@@ -1755,7 +1783,7 @@ details>p{
 }
 
 .reviews-next:hover{
-  background:#37323e;
+  background:rgba(255,255,255,.18);
 }
 
 .reviews-next:active{
@@ -1773,18 +1801,40 @@ details>p{
 }
 
 .review-card{
+  --text:#17151b;
+  --text-bright:#111;
+  --secondary:#55515b;
+  --caption:#66616c;
+  --core:#19161e;
+  --hairline:rgba(23,21,27,.1);
   min-width:0;
-  min-height:300px;
-  padding:30px;
+  min-height:330px;
+  padding:32px;
   border-radius:26px;
   border:1px solid var(--hairline);
   background:#fff;
-  box-shadow:0 10px 30px rgba(23,21,27,.025);
+  color:var(--text);
+  color-scheme:light;
+  box-shadow:0 12px 32px rgba(0,0,0,.1);
   display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+
+.review-rating{
+  color:#45345e;
+  font-size:18px;
+  line-height:1;
+  letter-spacing:.15em;
+}
+
+.review-star-empty{
+  color:#82788e;
 }
 
 .review-card blockquote{
   display:flex;
+  flex:1;
   flex-direction:column;
   justify-content:space-between;
   width:100%;
@@ -1809,7 +1859,7 @@ details>p{
 }
 
 .review-card .avatar{
-  font-family:"Roboto",sans-serif;
+  font-family:var(--font-sans);
   font-size:11px;
   overflow:hidden;
   flex-shrink:0;
@@ -2169,7 +2219,8 @@ main,
     min-height:52px;
     max-width:calc(100% - 32px);
     margin-top:12px;
-    top:12px;
+    /* Preserve the same 12px offset below the safe edge, including when sticky. */
+    top:calc(12px + env(safe-area-inset-top,0px));
     padding:5px 13px 5px 9px;
     gap:30px;
   }
@@ -2590,7 +2641,6 @@ main,
   .reviews{
     padding-block:48px 36px;
     margin:24px 12px;
-    border-radius:28px;
   }
 
   .reviews-heading{
@@ -2706,6 +2756,38 @@ main,
   }
 }
 
+/* Desktop navigation only; the mobile menu keeps its original controls and sizing. */
+@media(min-width:768px){
+  .site-header{
+    min-height:66px;
+    padding:10px 22px 10px 16px;
+    gap:34px;
+    background:rgba(22,19,31,.72);
+    border-color:rgba(183,155,255,.2);
+    -webkit-backdrop-filter:blur(24px) saturate(140%);
+    backdrop-filter:blur(24px) saturate(140%);
+    box-shadow:0 12px 36px rgba(5,5,8,.22),inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .site-nav{gap:26px;font-size:14px}
+  .site-nav a{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:44px;
+    padding:10px 6px;
+    border-radius:12px;
+    white-space:nowrap;
+    color:rgba(255,255,255,.76);
+    transition:color 180ms ease,background-color 180ms ease;
+  }
+  .site-nav .desktop-nav-only{display:inline-flex}
+  .site-nav a:hover{background:rgba(183,155,255,.08);color:var(--text-bright)}
+}
+@media(min-width:768px) and (max-width:1023px){
+  .site-header{padding-inline:16px;gap:18px}
+  .site-nav{gap:14px;font-size:12px}
+}
+
 @media(prefers-reduced-motion:reduce){
   html{
     scroll-behavior:auto;
@@ -2744,12 +2826,26 @@ main,
     backdrop-filter:none;
     -webkit-backdrop-filter:none;
   }
+  .algorithm-stage,.preview-dialog,.reviews-next{
+    background:#262136;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
 }
 
 @supports not (backdrop-filter:blur(20px)){
   .site-header{
     background:#191520;
   }
+  .algorithm-stage,.preview-dialog,.reviews-next{background:#262136}
+}
+
+@media(prefers-contrast:more){
+  .algorithm-stage,.preview-dialog,.reviews-next{background:#262136;border-color:var(--text-bright)}
+}
+@media(prefers-contrast:more) and (min-width:768px){
+  .site-header{background:#191520;border-color:var(--text-bright)}
+  .site-nav a{color:var(--text-bright)}
 }
 
 @media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){

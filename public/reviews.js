@@ -15,6 +15,19 @@
     if (entry.text) card.querySelector("blockquote > p").textContent = entry.text;
     if (entry.name) card.querySelector("footer strong").textContent = entry.name;
     if (entry.detail) card.querySelector("footer > span:last-child > span").textContent = entry.detail;
+    const rating = card.querySelector(".review-rating");
+    const configuredRating = Number(entry.rating);
+    const score = [4, 5].includes(configuredRating) ? configuredRating : (rating.dataset.rating === "4" ? 4 : 5);
+    rating.dataset.rating = String(score);
+    rating.setAttribute("aria-label", `${score} trên 5 sao`);
+    const stars = rating.querySelector("span");
+    stars.textContent = "★".repeat(score);
+    if (score === 4) {
+      const emptyStar = document.createElement("span");
+      emptyStar.className = "review-star-empty";
+      emptyStar.textContent = "☆";
+      stars.append(emptyStar);
+    }
     const avatar = card.querySelector(".avatar");
     const name = card.querySelector("footer strong").textContent;
     const initials = name.trim().split(/\s+/u).slice(-2).map(word => word[0]).join("");

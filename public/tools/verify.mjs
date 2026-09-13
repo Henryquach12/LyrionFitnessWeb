@@ -104,8 +104,32 @@ try {
   // Observe rendered frames from navigation onward, including the last frame
   // before the hold ends. No application timers or animations are changed.
   await send("Page.addScriptToEvaluateOnNewDocument", { source: `(() => {
-    const audit = window.__introAudit = { first: null, ready: null, beforeExit: null, duringExit: null, removed: null };
+    const audit = window.__introAudit = {
+      first: null, ready: null, beforeExit: null, duringExit: null, removed: null,
+      hero: { first: null, beforeStart: null, start: null, middle: null, finished: null, maxBeforeScale: 0 }
+    };
     const sample = () => {
+      const figures = document.querySelector('.hero-entrance');
+      if (figures && !audit.hero.finished) {
+        const css = getComputedStyle(figures), animation = figures.getAnimations()[0];
+        const frame = {
+          now: performance.now(), scale: new DOMMatrix(css.transform).a, opacity: Number(css.opacity),
+          width: figures.offsetWidth, height: figures.offsetHeight,
+          figures: figures.querySelectorAll('.hero-phone').length,
+          time: typeof animation?.currentTime === 'number' ? animation.currentTime : null,
+          duration: parseFloat(css.animationDuration) * 1000
+        };
+        audit.hero.first ||= frame;
+        if (frame.time !== null) {
+          audit.hero.start ||= frame;
+          if (!audit.hero.middle && frame.time >= frame.duration * .3 && frame.time <= frame.duration * .6) audit.hero.middle = frame;
+        } else if (!audit.hero.start) {
+          audit.hero.beforeStart = frame;
+          audit.hero.maxBeforeScale = Math.max(audit.hero.maxBeforeScale, frame.scale);
+        } else {
+          audit.hero.finished = frame;
+        }
+      }
       const intro = document.querySelector('.page-intro');
       if (intro?.open) {
         const css = getComputedStyle(intro), rect = intro.getBoundingClientRect();
@@ -131,9 +155,9 @@ try {
           if (!audit.duringExit && time >= hold + duration * .3 && time <= hold + duration * .7) audit.duringExit = frame;
         }
       } else if (audit.first) {
-        audit.removed = { now: performance.now(), connected: Boolean(intro), scrollLocked: getComputedStyle(document.documentElement).overflow === 'hidden' };
-        return;
+        audit.removed ||= { now: performance.now(), connected: Boolean(intro), scrollLocked: getComputedStyle(document.documentElement).overflow === 'hidden' };
       }
+      if (audit.removed && audit.hero.finished) return;
       requestAnimationFrame(sample);
     };
     requestAnimationFrame(sample);
@@ -170,6 +194,18 @@ try {
     check(label + " removes intro and unlocks page at fade completion", !audit.removed.connected && !audit.removed.scrollLocked && Math.abs(elapsed - (reduced ? 3160 : 3500)) < 125, { elapsed, ...audit.removed });
     const layoutAfterIntro = await evaluate("({width:document.querySelector('.hero').getBoundingClientRect().width,x:document.querySelector('.hero').getBoundingClientRect().x})");
     check(label + " release preserves main page width and position", layoutDuringIntro.width === layoutAfterIntro.width && layoutDuringIntro.x === layoutAfterIntro.x, { during: layoutDuringIntro, after: layoutAfterIntro });
+    if (imageName && !reduced) await screenshot(imageName.replace('-intro.png', '-hero-entrance.png'));
+    await waitFor("Boolean(window.__introAudit.hero.finished)", label + " hero figures to settle");
+    const hero = await evaluate("window.__introAudit.hero");
+    const fadeStart = audit.ready.now - audit.ready.time + 3000;
+    check(label + " two existing hero figures begin with the logo fade", hero.first.figures === 2 && Math.abs(hero.start.now - fadeStart) < 125, { heroStart: hero.start.now, fadeStart, figures: hero.first.figures });
+    if (reduced) {
+      check(label + " hero uses a brief fade with no scaling", hero.first.scale === 1 && hero.middle.scale === 1 && hero.finished.scale === 1 && hero.start.duration <= 250 && hero.middle.opacity > hero.first.opacity, hero);
+    } else {
+      check(label + " hero figures stay noticeably small before entering", hero.first.scale > 0 && hero.maxBeforeScale <= .8 && hero.beforeStart.now >= fadeStart - 100, hero.beforeStart);
+      check(label + " hero figures grow gradually to their intended size", hero.start.duration >= 1600 && hero.start.duration <= 3000 && hero.middle.scale > hero.first.scale && hero.middle.scale < 1 && hero.finished.scale === 1 && hero.finished.opacity === 1, hero);
+    }
+    check(label + " hero entrance preserves layout dimensions", hero.first.width === hero.finished.width && hero.first.height === hero.finished.height, { before: hero.first, after: hero.finished });
     await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
     await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
     check(label + " normal keyboard access resumes after intro", await evaluate("document.activeElement.matches('a[href],button,input,summary,[tabindex]') && !document.activeElement.closest('.page-intro')"));
@@ -184,21 +220,77 @@ try {
     await delay(100);
   }
   await evaluate("document.fonts.ready.then(() => true)");
-  check("Roboto loaded and applied", await evaluate("document.fonts.check('16px Roboto') && getComputedStyle(document.body).fontFamily.includes('Roboto')"));
-  check("Review surface is white with black text", await evaluate("getComputedStyle(document.querySelector('.reviews')).backgroundColor === 'rgb(255, 255, 255)' && getComputedStyle(document.querySelector('#reviews-title')).color === 'rgb(17, 17, 17)' && getComputedStyle(document.querySelector('.review-card blockquote > p')).color === 'rgb(23, 21, 27)'"));
+  check("Be Vietnam Pro font weights load from declared faces", await evaluate(`
+    Promise.all([400, 500, 600, 700].map(async weight => {
+      const faces = await document.fonts.load(weight + ' 16px "Be Vietnam Pro"', 'Tập luyện và dinh dưỡng');
+      return faces.length > 0 && faces.every(face => face.status === 'loaded' && face.weight === String(weight));
+    })).then(loaded => loaded.every(Boolean))
+  `));
+  check("Reviews use the theme background and white headings", await evaluate(`
+    getComputedStyle(document.querySelector('.reviews')).backgroundColor === 'rgba(0, 0, 0, 0)' &&
+    [...document.querySelectorAll('#reviews-title, #reviews-title span, .reviews-heading .eyebrow')].every(element => getComputedStyle(element).color === 'rgb(255, 255, 255)') &&
+    document.querySelector('#reviews-title').innerText.replace(/\\s+/g, ' ').trim() === 'Một kế hoạch riêng. Vừa với cuộc sống.'
+  `));
+  check("Review cards retain white surfaces and dark readable copy", await evaluate(`
+    [...document.querySelectorAll('.review-card')].every(card =>
+      getComputedStyle(card).backgroundColor === 'rgb(255, 255, 255)' &&
+      getComputedStyle(card.querySelector('blockquote > p')).color === 'rgb(23, 21, 27)')
+  `));
+  check("Every review has an accessible four- or five-star rating", await evaluate(`
+    [...document.querySelectorAll('.review-card')].every(card => {
+      const rating = card.querySelector('.review-rating');
+      const stars = Number(rating?.dataset.rating);
+      return [4, 5].includes(stars) && rating.getAttribute('role') === 'img' &&
+        rating.getAttribute('aria-label') === stars + ' trên 5 sao' &&
+        rating.querySelector('[aria-hidden="true"]')?.textContent.replace(/\\s/g, '').length === 5;
+    }) && document.querySelector('.review-rating[data-rating="4"]') !== null && document.querySelector('.review-rating[data-rating="5"]') !== null
+  `));
   check("No nested entrance transforms", await evaluate("!document.querySelector('.will-reveal .will-reveal')"));
   check("Feature cards have subtle stagger delays", await evaluate("JSON.stringify([...document.querySelectorAll('.preview-card')].map(el=>el.style.getPropertyValue('--reveal-delay'))) === JSON.stringify(['80ms','140ms','200ms','260ms'])"));
   check("Offscreen components wait to reveal and hidden fourth review is ready", await evaluate("!document.querySelector('.waitlist-board').classList.contains('is-visible') && document.querySelector('[data-review=\"3\"]').classList.contains('is-visible')"));
   check("Three visible reviews out of four", await evaluate("document.querySelectorAll('.review-card:not([hidden])').length === 3 && document.querySelectorAll('.review-card').length === 4"));
-  check("Marked captions, arrows and privacy section removed", await evaluate("!document.querySelector('.hero-bottom,.gallery-note,.visual-caption,.illustrative-label,#privacy,.hero-actions [aria-hidden],.preview-open [aria-hidden]')"));
+  check("Marked captions, hero footnote, arrows and privacy section removed", await evaluate("!document.querySelector('.hero-footnote,.hero-bottom,.gallery-note,.visual-caption,.illustrative-label,#privacy,.hero-actions [aria-hidden],.preview-open [aria-hidden]')"));
   check("Visible sample-content notes are removed", await evaluate("!document.querySelector('[data-reviews-note],.reviews-note') && !/Nội dung mẫu|Giao diện minh họa|dữ liệu minh họa/i.test(document.body.textContent)"));
   check("Waitlist replaces privacy section", await evaluate("document.querySelector('#waitlist').previousElementSibling.id === 'intelligence' && document.querySelector('#waitlist').nextElementSibling.id === 'reviews'"));
-  check("Inter font loaded", await evaluate("document.fonts.check('16px Inter')"));
-  check("Compact island navigation", await evaluate("document.querySelector('.site-header').getBoundingClientRect().width < 650 && document.querySelector('.site-header').getBoundingClientRect().height < 65"));
+  check("Page, app previews and review avatars share Be Vietnam Pro", await evaluate(`
+    (() => {
+      const normalize = value => value.split(',').map(family => family.trim()).join(',');
+      const stack = normalize(getComputedStyle(document.documentElement).getPropertyValue('--font-sans'));
+      const elements = [document.body, document.querySelector('.phone-preview'), document.querySelector('.avatar')];
+      return stack.startsWith('"Be Vietnam Pro",') && elements.every(element =>
+        element && normalize(getComputedStyle(element).fontFamily) === stack);
+    })()
+  `));
+  const desktopNav = await evaluate(`(() => {
+    const header = document.querySelector('.site-header'), css = getComputedStyle(header);
+    const links = [...document.querySelectorAll('.site-nav a')].filter(link => link.getClientRects().length);
+    return { width: header.getBoundingClientRect().width, height: header.getBoundingClientRect().height,
+      padding: parseFloat(css.paddingRight), gap: parseFloat(getComputedStyle(document.querySelector('.site-nav')).gap),
+      links: links.map(link => ({ href: link.getAttribute('href'), height: link.getBoundingClientRect().height, fontSize: parseFloat(getComputedStyle(link).fontSize) })),
+      blur: css.backdropFilter, background: css.backgroundColor, shadow: css.boxShadow };
+  })()`);
+  check("Desktop island navigation is larger with comfortable click targets", desktopNav.height >= 64 && desktopNav.width > 650 && desktopNav.width < 1100 && desktopNav.padding >= 18 && desktopNav.gap > 18 && desktopNav.links.every(link => link.height >= 40 && link.fontSize >= 13), desktopNav);
+  check("Desktop navigation includes useful waitlist and FAQ anchors", JSON.stringify(desktopNav.links.map(link => link.href).sort()) === JSON.stringify(['#features', '#intelligence', '#reviews', '#waitlist', '#faq'].sort()), desktopNav.links);
+  check("Desktop menu has restrained translucent glass styling", desktopNav.blur.includes('blur(') && desktopNav.background.startsWith('rgba(') && desktopNav.shadow !== 'none', desktopNav);
   check("Four app previews", await evaluate("document.querySelectorAll('.preview-grid [data-preview]').length === 4"));
-  check("App Store disabled until configured", await evaluate("document.querySelector('[data-store-link]').getAttribute('aria-disabled') === 'true' && !document.querySelector('[data-store-link]').hasAttribute('href')"));
+  check("All download CTAs are inactive links with the requested label", await evaluate(`
+    document.querySelectorAll('[data-store-link]').length >= 2 && [...document.querySelectorAll('[data-store-link]')].every(link =>
+      link.tagName === 'A' && link.getAttribute('href') === '#' && link.getAttribute('aria-disabled') === 'true' && link.textContent.trim() === 'Tải tại đây')
+  `));
+  await evaluate("window.scrollTo({top:250,behavior:'instant'})");
+  const disabledClick = await evaluate(`(() => {
+    const before = { url: location.href, top: scrollY };
+    const prevented = [...document.querySelectorAll('[data-store-link]')].every(link => !link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })));
+    return { prevented, before, after: { url: location.href, top: scrollY } };
+  })()`);
+  check("Inactive download clicks are prevented without jumping or navigating", disabledClick.prevented && JSON.stringify(disabledClick.before) === JSON.stringify(disabledClick.after), disabledClick);
+  await evaluate("document.querySelector('[data-store-link]').focus({preventScroll:true});window.__downloadKeyboard={url:location.href,top:scrollY}");
+  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13, text: "\r", unmodifiedText: "\r" });
+  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13 });
+  check("Inactive download Enter key does not navigate or jump", await evaluate("location.href === window.__downloadKeyboard.url && scrollY === window.__downloadKeyboard.top"));
+  await evaluate("document.activeElement.blur();window.scrollTo({top:0,behavior:'instant'})");
   check("No broken eager images", await evaluate("Promise.all([...document.images].filter(img => img.loading !== 'lazy').map(img => img.decode().then(()=>true,()=>false))).then(results=>results.every(Boolean))"));
-  check("All anchor targets exist", await evaluate("[...document.querySelectorAll('a[href^=\"#\"]')].every(a => document.getElementById(a.getAttribute('href').slice(1)))"));
+  check("All section anchor targets exist", await evaluate("[...document.querySelectorAll('a[href^=\"#\"]:not([data-store-link])')].every(a => document.getElementById(a.getAttribute('href').slice(1)))"));
   for (const width of [1440, 1024, 768, 390, 320]) {
     await send("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: width < 768 });
     await delay(100);

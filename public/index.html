@@ -2,17 +2,17 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#16131F">
-  <meta name="description" content="LyrionFitness kết hợp kế hoạch tập gym thích ứng và theo dõi calo, macro theo mục tiêu của bạn. Sắp có trên App Store.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#262136">
+  <meta name="description" content="LyrionFitness kết hợp kế hoạch tập gym thích ứng và theo dõi calo, macro theo mục tiêu của bạn.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="LyrionFitness — Một kế hoạch. Dành riêng cho bạn.">
   <meta property="og:description" content="Tập luyện và dinh dưỡng, được thiết kế theo mục tiêu và nhịp sống của bạn. Sắp ra mắt trên iPhone.">
   <meta property="og:image" content="assets/lyrion-hero.png">
   <title>LyrionFitness — Tập luyện theo cách của bạn</title>
   <link rel="icon" type="image/png" href="assets/lyrion-icon.png">
-  <link rel="preload" href="assets/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="assets/Roboto.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/BeVietnamPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/BeVietnamPro-Medium.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="assets/lyrion-mark.png" as="image" fetchpriority="high">
   <link rel="preload" href="intro.js" as="script">
   <link rel="stylesheet" href="styles.css">
@@ -42,6 +42,8 @@
       <a href="#features">Tính năng</a>
       <a href="#intelligence">Cá nhân hóa</a>
       <a href="#reviews">Đánh giá</a>
+      <a class="desktop-nav-only" href="#waitlist">Đăng ký</a>
+      <a class="desktop-nav-only" href="#faq">Hỏi đáp</a>
     </nav>
   </header>
 
@@ -53,14 +55,15 @@
         <p class="hero-description">Kế hoạch tập thích ứng. Calo được theo dõi.<br class="desktop-break"> Tất cả bắt đầu từ mục tiêu của bạn.</p>
         <div class="hero-actions">
           <a class="button primary" href="#features">Khám phá Lyrion</a>
-          <a class="quiet-link" href="#download">Sắp có trên App Store</a>
+          <a class="quiet-link" href="#" data-store-link aria-disabled="true"><span data-store-label>Tải tại đây</span></a>
         </div>
-        <p class="hero-footnote">Tập có định hướng. Ăn theo mục tiêu. Tiến bộ theo bạn.</p>
       </div>
       <div class="hero-visual" role="img" aria-label="Minh họa ứng dụng LyrionFitness trên iPhone, với kế hoạch tập và theo dõi calo">
         <div class="hero-phones">
-          <div class="device hero-phone hero-phone-back" aria-hidden="true"><div class="device-screen" data-preview="nutrition"></div></div>
-          <div class="device hero-phone hero-phone-front" aria-hidden="true"><div class="device-screen" data-preview="welcome"></div></div>
+          <div class="hero-entrance">
+            <div class="device hero-phone hero-phone-back" aria-hidden="true"><div class="device-screen" data-preview="nutrition"></div></div>
+            <div class="device hero-phone hero-phone-front" aria-hidden="true"><div class="device-screen" data-preview="welcome"></div></div>
+          </div>
         </div>
       </div>
     </section>
@@ -178,15 +181,19 @@
       <div class="review-window wrap" role="region" aria-roledescription="băng chuyền" aria-label="Nhận xét">
           <div class="review-group" id="review-group">
             <article class="review-card" data-review="0">
+              <div class="review-rating" role="img" aria-label="5 trên 5 sao" data-rating="5"><span aria-hidden="true">★★★★★</span></div>
               <blockquote><p>Tui đã sử dụng app được 1 tuần và cảm thấy rất phù hợp với thời gian biểu bận rộn của tui mà các bài tập lại rất hợp lý</p><footer><span class="avatar" aria-hidden="true">MT</span><span><strong>Minh Thư</strong><span>27 tuổi, nhân viên văn phòng</span></span></footer></blockquote>
             </article>
             <article class="review-card" data-review="1">
+              <div class="review-rating" role="img" aria-label="5 trên 5 sao" data-rating="5"><span aria-hidden="true">★★★★★</span></div>
               <blockquote><p>Đi làm về là tui mở lịch lên tập luôn. Có sẵn bài tập với số hiệp nên đỡ mất thời gian nghĩ hôm nay tập gì.</p><footer><span class="avatar" aria-hidden="true">HN</span><span><strong>Hoàng Nam</strong><span>29 tuổi, nhân viên văn phòng</span></span></footer></blockquote>
             </article>
             <article class="review-card" data-review="2">
+              <div class="review-rating" role="img" aria-label="4 trên 5 sao" data-rating="4"><span aria-hidden="true">★★★★<span class="review-star-empty">☆</span></span></div>
               <blockquote><p>Tui thích ghi lại bữa ăn rồi xem calo với macro ngay trong cùng một app. Dễ nhìn lại thói quen của mình hơn.</p><footer><span class="avatar" aria-hidden="true">GH</span><span><strong>Gia Hân</strong><span>24 tuổi, người mới tập gym</span></span></footer></blockquote>
             </article>
             <article class="review-card" data-review="3" hidden>
+              <div class="review-rating" role="img" aria-label="5 trên 5 sao" data-rating="5"><span aria-hidden="true">★★★★★</span></div>
               <blockquote><p>Có tuần bận thì tui đổi lại lịch tập. Nhìn được tiến độ qua từng tuần khiến tui muốn duy trì đều hơn.</p><footer><span class="avatar" aria-hidden="true">AK</span><span><strong>An Khang</strong><span>Tập luyện theo lịch linh hoạt</span></span></footer></blockquote>
             </article>
           </div>
@@ -194,7 +201,7 @@
       <p class="sr-only" data-review-status role="status" aria-live="polite" aria-atomic="true">Đang hiển thị nhận xét 1, 2, 3 trên 4.</p>
     </section>
 
-    <section class="faq section wrap" aria-labelledby="faq-title">
+    <section class="faq section wrap" id="faq" aria-labelledby="faq-title">
       <div class="reveal"><p class="eyebrow">TRƯỚC KHI BẮT ĐẦU</p><h2 id="faq-title">Có thể bạn<br><span>đang thắc mắc.</span></h2></div>
       <div class="faq-items reveal">
         <details><summary>Lyrion đã có trên App Store chưa?<span class="faq-plus" aria-hidden="true"></span></summary><p data-release-answer>LyrionFitness đang chuẩn bị ra mắt trên App Store. Liên kết tải ứng dụng sẽ được cập nhật ngay tại trang này khi có bản phát hành.</p></details>
@@ -209,8 +216,7 @@
       <p class="eyebrow">LYRIONFITNESS CHO IPHONE</p>
       <h2 id="download-title">Một khởi đầu mới.<br><span>Một phiên bản của chính bạn.</span></h2>
       <p>Tập luyện và dinh dưỡng, theo nhịp sống của bạn.</p>
-      <a class="button primary store-button" data-store-link role="link" aria-disabled="true"><span data-store-label>Sắp có trên App Store</span></a>
-      <p class="release-note" data-release-note>Đang chuẩn bị ra mắt. Hẹn gặp bạn trên iPhone.</p>
+      <a class="button primary store-button" href="#" data-store-link aria-disabled="true"><span data-store-label>Tải tại đây</span></a>
       <p class="launch-offer" data-launch-offer hidden></p>
     </section>
   </main>

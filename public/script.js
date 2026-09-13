@@ -33,24 +33,27 @@
   let storeUrl = null;
   try {
     const url = new URL(config.appStoreUrl);
-    if (url.protocol === "https:" && url.hostname === "apps.apple.com") storeUrl = url.href;
-  } catch { /* Keep the explicit coming-soon state until a valid URL exists. */ }
+    if (url.protocol === "https:" && !url.username && !url.password) storeUrl = url.href;
+  } catch { /* An empty or invalid URL keeps the download links inactive. */ }
 
-  if (storeUrl) {
-    document.querySelectorAll("[data-store-link]").forEach(link => {
-      link.href = storeUrl;
+  document.querySelectorAll("[data-store-link]").forEach(link => {
+    link.href = storeUrl || "#";
+    if (storeUrl) {
       link.target = "_blank";
       link.rel = "noopener noreferrer";
       link.removeAttribute("aria-disabled");
+    } else {
+      link.setAttribute("aria-disabled", "true");
+      link.removeAttribute("target");
+      link.removeAttribute("rel");
+    }
+    link.addEventListener("click", event => {
+      if (link.getAttribute("aria-disabled") === "true") event.preventDefault();
     });
-    document.querySelectorAll("[data-store-label]").forEach(el => { el.textContent = "Tải trên App Store"; });
-    document.querySelectorAll("[data-release-note]").forEach(el => { el.textContent = "LyrionFitness đã có mặt trên App Store."; });
-    document.querySelectorAll("[data-release-answer]").forEach(el => { el.textContent = "LyrionFitness đã có trên App Store. Chọn nút tải ở cuối trang để mở trang ứng dụng."; });
-    const heroLink = document.querySelector(".quiet-link");
-    heroLink.textContent = "Tải trên App Store";
-    heroLink.href = storeUrl;
-    heroLink.target = "_blank";
-    heroLink.rel = "noopener noreferrer";
+  });
+  document.querySelectorAll("[data-store-label]").forEach(el => { el.textContent = "Tải tại đây"; });
+  if (storeUrl) {
+    document.querySelectorAll("[data-release-answer]").forEach(el => { el.textContent = "Bạn có thể tải LyrionFitness qua nút Tải tại đây trên trang này."; });
   }
 
   if (typeof config.launchOffer === "string" && config.launchOffer.trim()) {
