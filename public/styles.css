@@ -61,12 +61,13 @@ body{
   /* Keep content in its original safe region while the background reaches every edge. */
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
-  background:linear-gradient(
-    180deg,
-    var(--crest) 0%,
-    var(--haze) 25%,
-    #100e17 52%,
-    var(--abyss) 100%
+  background: linear-gradient(
+    135deg,
+    #251D38 0%,
+    #1E172F 25%,
+    #171225 50%,
+    #0F0C19 75%,
+    #060509 100%
   );
   color:var(--text);
   font-family:var(--font-sans);
@@ -1580,7 +1581,7 @@ details>p{
 .waitlist-board{
   padding:42px;
   border-radius:30px;
-  background:linear-gradient(145deg,#fff,#efecf6);
+  background:linear-gradient(145deg,#fdf8f8,#c7b3f8);
   color:#1d1829;
   box-shadow:0 26px 70px rgba(0,0,0,.22);
   color-scheme:light;
@@ -1659,7 +1660,7 @@ details>p{
   width:100%;
   min-height:52px;
   padding:14px 16px;
-  background:#262136;
+  background:#342c4e;
   color:#fff;
   border:0;
   border-radius:999px;
@@ -1671,7 +1672,7 @@ details>p{
 }
 
 .waitlist-submit:hover{
-  background:#3c3055;
+  background:#6c569c;
 }
 
 .waitlist-submit:active{
@@ -2862,4 +2863,38 @@ main,
       scale(calc(var(--phone-scale) + .045));
     z-index:4;
   }
+}
+
+/* Áp dụng dải màu tím nhạt lavender cho nút Đăng ký */
+.site-nav a[href="#waitlist"] {
+  /* Dải chuyển màu chuyển từ sáng (trên) xuống tím nhạt (dưới) */
+  background: linear-gradient(180deg, #E2D4FF 0%, #C4A8FF 100%);
+  
+  /* Màu chữ tối để nổi bật trên nền sáng */
+  color: #121018 !important; 
+  
+  /* Căn chỉnh khoảng cách và bo tròn dạng pill */
+  padding: 8px 22px;
+  border-radius: 9999px;
+  font-weight: 600;
+  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Hiệu ứng chuyển cảnh mượt */
+  transition: all 0.25s ease-in-out;
+}
+
+/* Hiệu ứng khi rê chuột vào nút */
+.site-nav a[href="#waitlist"]:hover {
+  background: linear-gradient(180deg, #EBDFFF 0%, #CFB5FF 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(196, 168, 255, 0.4); /* Glow nhẹ tông tím nhạt */
+}
+
+/* Hiệu ứng khi nhấn vào nút */
+.site-nav a[href="#waitlist"]:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
