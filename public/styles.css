@@ -948,18 +948,20 @@ blockquote footer>span>span{
   gap:12px;
 }
 
-details{
-  background:rgba(0,0,0,.25);
+.faq-items details{
+  background:#08080c;
   border:1px solid var(--hairline);
   border-radius:var(--radius-sm);
-  padding:0 21px;
+  overflow:hidden;
 }
 
-summary{
-  padding:20px 0;
+.faq-items summary{
+  padding:20px 21px;
+  background:#08080c;
+  color:var(--text-bright);
   list-style:none;
   cursor:pointer;
-  font-size:12px;
+  font-size:16px;
   line-height:1.7;
   display:flex;
   justify-content:space-between;
@@ -967,6 +969,8 @@ summary{
   gap:20px;
   font-weight:500;
 }
+
+.faq-items summary:focus-visible{outline-offset:-5px}
 
 summary::-webkit-details-marker{
   display:none;
@@ -1000,10 +1004,13 @@ details[open] .faq-plus:after{
   transform:rotate(0);
 }
 
-details>p{
-  font-size:12px;
+.faq-items details>p{
+  background:#2b2b30;
+  color:#f1f1f3;
+  border-top:1px solid rgba(255,255,255,.08);
+  font-size:16px;
   line-height:1.85;
-  padding-bottom:22px;
+  padding:20px 21px 22px;
 }
 
 .download{
@@ -1842,7 +1849,7 @@ details>p{
 }
 
 .review-card blockquote>p{
-  font-size:17px;
+  font-size:20px;
   line-height:1.8;
   letter-spacing:-.01em;
 }
@@ -1852,11 +1859,11 @@ details>p{
 }
 
 .review-card blockquote footer strong{
-  font-size:13px;
+  font-size:14px;
 }
 
 .review-card blockquote footer>span>span{
-  font-size:11px;
+  font-size:13px;
 }
 
 .review-card .avatar{
@@ -2169,8 +2176,8 @@ main,
     gap:35px;
   }
 
-  .faq summary{
-    font-size:11px;
+  .faq-items summary{
+    font-size:15px;
   }
 
   .hero-actions .button{
@@ -2199,7 +2206,7 @@ main,
   }
 
   .review-card blockquote>p{
-    font-size:15px;
+    font-size:18px;
   }
 }
 
@@ -2571,11 +2578,13 @@ main,
     gap:10px;
   }
 
-  summary{
-    font-size:12px;
+  .faq-items summary{
+    font-size:15px;
     min-height:67px;
     padding-block:18px;
   }
+
+  .faq-items details>p{font-size:15px}
 
   .download{
     padding:65px 18px 70px;
@@ -2683,7 +2692,7 @@ main,
   }
 
   .review-card blockquote>p{
-    font-size:17px;
+    font-size:18px;
   }
 }
 
@@ -2866,6 +2875,7 @@ main,
 }
 
 /* Áp dụng dải màu tím nhạt lavender cho nút Đăng ký */
+@media(min-width:768px){
 .site-nav a[href="#waitlist"] {
   /* Dải chuyển màu chuyển từ sáng (trên) xuống tím nhạt (dưới) */
   background: linear-gradient(180deg, #E2D4FF 0%, #C4A8FF 100%);
@@ -2883,7 +2893,7 @@ main,
   justify-content: center;
   
   /* Hiệu ứng chuyển cảnh mượt */
-  transition: all 0.25s ease-in-out;
+  transition:transform 160ms var(--ease-out),box-shadow 180ms ease;
 }
 
 /* Hiệu ứng khi rê chuột vào nút */
@@ -2897,4 +2907,5 @@ main,
 .site-nav a[href="#waitlist"]:active {
   transform: translateY(0);
   box-shadow: none;
+}
 }

@@ -291,6 +291,61 @@ try {
   await evaluate("document.activeElement.blur();window.scrollTo({top:0,behavior:'instant'})");
   check("No broken eager images", await evaluate("Promise.all([...document.images].filter(img => img.loading !== 'lazy').map(img => img.decode().then(()=>true,()=>false))).then(results=>results.every(Boolean))"));
   check("All section anchor targets exist", await evaluate("[...document.querySelectorAll('a[href^=\"#\"]:not([data-store-link])')].every(a => document.getElementById(a.getAttribute('href').slice(1)))"));
+  // Recorded before the prompt changes, with the same bundled font loaded.
+  // Keep these essentials inline so verification does not depend on local artifacts.
+  for (const [width, headerX, headerWidth, buttonX, menuX, menuWidth] of [
+    [390, 20, 350, 291.90625, 40, 310],
+    [320, 16, 288, 225.90625, 20, 280]
+  ]) {
+    await send("Emulation.setDeviceMetricsOverride", { width, height: 844, deviceScaleFactor: 1, mobile: true });
+    await evaluate("window.scrollTo({top:0,behavior:'instant'})");
+    await delay(100);
+    const closed = await evaluate(`(() => {
+      const box = selector => { const r = document.querySelector(selector).getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; };
+      const header = getComputedStyle(document.querySelector('.site-header'));
+      const toggle = getComputedStyle(document.querySelector('.menu-toggle'));
+      return { header: box('.site-header'), toggle: box('.menu-toggle'), closed: getComputedStyle(document.querySelector('.site-nav')).display === 'none',
+        padding: header.padding, gap: header.gap, fontSize: toggle.fontSize, blur: header.backdropFilter, background: header.backgroundColor };
+    })()`);
+    const closeTo = (actual, expected) => actual.every((value, index) => Math.abs(value - expected[index]) < .1);
+    check("Mobile navigation preserves original closed geometry at " + width,
+      closed.closed && closeTo(closed.header, [headerX, 12, headerWidth, 54]) && closeTo(closed.toggle, [buttonX, 18, 64.09375, 42]), closed);
+    check("Mobile navigation preserves original sizing and glass styling at " + width,
+      closed.padding === '5px 13px 5px 9px' && closed.gap === '30px' && closed.fontSize === '12px' && closed.blur === 'blur(20px)' && closed.background === 'rgba(10, 8, 15, 0.86)', closed);
+    await evaluate("document.querySelector('.menu-toggle').click()");
+    const opened = await evaluate(`(() => {
+      const menu = document.querySelector('.site-nav'), r = menu.getBoundingClientRect(), css = getComputedStyle(menu);
+      const links = [...menu.querySelectorAll('a')].filter(link => link.getClientRects().length);
+      return { box: [r.x, r.y, r.width, r.height], padding: css.padding, background: css.backgroundColor,
+        links: links.map(link => ({ href: link.getAttribute('href'), font: getComputedStyle(link).fontSize, padding: getComputedStyle(link).padding })) };
+    })()`);
+    check("Mobile dropdown retains original geometry and three original links at " + width,
+      closeTo(opened.box, [menuX, 74, menuWidth, 195.171875]) && opened.padding === '15px' && opened.background === 'rgb(26, 22, 36)' &&
+      JSON.stringify(opened.links.map(link => link.href)) === JSON.stringify(['#features', '#intelligence', '#reviews']) &&
+      opened.links.every(link => link.font === '16px' && link.padding === '14px'), opened);
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+    check("Mobile Escape closes menu and restores toggle focus at " + width, await evaluate("document.querySelector('.menu-toggle').getAttribute('aria-expanded') === 'false' && document.activeElement.matches('.menu-toggle')"));
+    await evaluate("document.activeElement.blur()");
+  }
+  await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+  await send("Emulation.setSafeAreaInsetsOverride", { insets: { top: 59, right: 0, bottom: 34, left: 0 } });
+  await evaluate("window.scrollTo({top:0,behavior:'instant'})");
+  await delay(100);
+  const notch = await evaluate(`(() => {
+    const header = document.querySelector('.site-header').getBoundingClientRect();
+    const body = getComputedStyle(document.body);
+    return { viewport: document.querySelector('meta[name="viewport"]').content,
+      theme: document.querySelector('meta[name="theme-color"]').content.toLowerCase(),
+      root: getComputedStyle(document.documentElement).backgroundColor,
+      bodyTop: document.body.getBoundingClientRect().top, background: body.backgroundImage,
+      paddingTop: body.paddingTop, paddingBottom: body.paddingBottom,
+      header: { x: header.x, y: header.y, width: header.width, height: header.height } };
+  })()`);
+  check("Notch viewport extends the theme background through the top safe area", notch.viewport.includes('viewport-fit=cover') && notch.theme === '#262136' && notch.root === 'rgb(38, 33, 54)' && notch.bodyTop === 0 && notch.background.includes('linear-gradient'), notch);
+  check("Notch insets preserve the mobile menu size and safe-region offset", notch.paddingTop === '59px' && notch.paddingBottom === '34px' && notch.header.x === 20 && notch.header.y === 71 && notch.header.width === 350 && notch.header.height === 54, notch);
+  await screenshot("mobile-safe-area.png");
+  await send("Emulation.setSafeAreaInsetsOverride", { insets: { top: 0, right: 0, bottom: 0, left: 0 } });
   for (const width of [1440, 1024, 768, 390, 320]) {
     await send("Emulation.setDeviceMetricsOverride", { width, height: 900, deviceScaleFactor: 1, mobile: width < 768 });
     await delay(100);
@@ -400,6 +455,18 @@ try {
     await evaluate("document.querySelector('#reviews').scrollIntoView({behavior:'instant',block:'center'})");
     await delay(800);
     await screenshot(prefix + "-reviews.png");
+    check(prefix + " review copy has the larger readable type size", await evaluate("[...document.querySelectorAll('.review-card blockquote > p')].every(element => parseFloat(getComputedStyle(element).fontSize) >= " + (width < 768 ? 18 : 20) + ")"));
+    await evaluate("document.querySelector('.faq-items details').open=true;document.querySelector('#faq').scrollIntoView({behavior:'instant',block:'center'})");
+    await delay(150);
+    const faq = await evaluate(`(() => {
+      const details = document.querySelector('.faq-items details'), summary = getComputedStyle(details.querySelector('summary')), answer = getComputedStyle(details.querySelector('p'));
+      return { questionBackground: summary.backgroundColor === 'rgba(0, 0, 0, 0)' ? getComputedStyle(details).backgroundColor : summary.backgroundColor,
+        answerBackground: answer.backgroundColor, questionSize: parseFloat(summary.fontSize), answerSize: parseFloat(answer.fontSize), open: details.open };
+    })()`);
+    check(prefix + " FAQ separates black questions and gray expanded answers", faq.open && faq.questionBackground === 'rgb(8, 8, 12)' && faq.answerBackground === 'rgb(43, 43, 48)', faq);
+    check(prefix + " FAQ uses larger readable question and answer type", faq.questionSize >= (width < 768 ? 15 : 16) && faq.answerSize >= (width < 768 ? 15 : 16), faq);
+    await screenshot(prefix + "-faq.png");
+    await evaluate("document.querySelector('.faq-items details').open=false");
     if (width < 768) {
       check("Touch devices have no pointer or background effect", await evaluate("!matchMedia('(pointer:fine)').matches && !document.querySelector('.pointer-trail,.background-trace,.ambient-light,.wave-field,#pointer-glow')"));
       await evaluate("document.querySelector('.menu-toggle').click()");
@@ -413,9 +480,9 @@ try {
   await delay(100);
   check("Reduced motion preference respected", await evaluate("getComputedStyle(document.documentElement).scrollBehavior === 'auto' && [...document.querySelectorAll('.will-reveal')].every(el=>getComputedStyle(el).opacity === '1')"));
   check("Reduced motion keeps effects absent and disables scroll scale", await evaluate("!document.querySelector('.pointer-trail,.background-trace,.ambient-light,.wave-field,#pointer-glow') && getComputedStyle(document.querySelector('.hero-phones')).transform === 'none'"));
-  await evaluate("window.LYRION_CONFIG.appStoreUrl='https://apps.apple.com/vn/app/lyrionfitness/id123456789';window.LYRION_CONFIG.screenshots.welcome='assets/lyrion-icon.png'");
+  await evaluate("window.LYRION_CONFIG.appStoreUrl='https://example.com/lyrion/download';window.LYRION_CONFIG.screenshots.welcome='assets/lyrion-icon.png'");
   await evaluate("new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='script.js?config-test';s.onload=resolve;s.onerror=reject;document.head.append(s)})");
-  check("App Store activates from config", await evaluate("document.querySelector('[data-store-link]').href === window.LYRION_CONFIG.appStoreUrl && !document.querySelector('[data-store-link]').hasAttribute('aria-disabled') && document.querySelector('[data-store-label]').textContent === 'Tải trên App Store'"));
+  check("One HTTPS app URL activates every download link without changing labels", await evaluate("[...document.querySelectorAll('[data-store-link]')].every(link => link.href === window.LYRION_CONFIG.appStoreUrl && !link.hasAttribute('aria-disabled') && link.textContent.trim() === 'Tải tại đây' && link.target === '_blank' && link.rel.includes('noopener'))"));
   check("Real screenshot config replaces preview", await evaluate("document.querySelector('[data-preview=\"welcome\"] img').getAttribute('src') === 'assets/lyrion-icon.png'"));
   await evaluate("window.LYRION_CONFIG.reviews[0].avatar='assets/lyrion-icon.png';window.LYRION_CONFIG.reviews[0].name='Ảnh mới';new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='reviews.js?config-test';s.onload=resolve;s.onerror=reject;document.head.append(s)})");
   check("Review avatar can be replaced from config", await evaluate("document.querySelector('[data-review=\"0\"] .avatar img').getAttribute('src').endsWith('assets/lyrion-icon.png') && document.querySelector('[data-review=\"0\"] strong').textContent === 'Ảnh mới'"));

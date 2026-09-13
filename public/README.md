@@ -40,7 +40,7 @@ Trong `config.js`, điền URL HTTPS chính thức vào `appStoreUrl`. Ví dụ 
 appStoreUrl: "https://apps.apple.com/vn/app/lyrionfitness/id123456789"
 ```
 
-ID trên chỉ minh họa định dạng; thay bằng URL thật của bạn. Khi để trống, trang hiển thị “Sắp có trên App Store”; nút tải chưa được bật. Khi thêm URL hợp lệ từ apps.apple.com, nút tải và nội dung trạng thái tự cập nhật.
+ID trên chỉ minh họa định dạng; thay bằng URL thật của bạn. Cả hai liên kết tải luôn hiển thị “Tải tại đây”. Để trống `appStoreUrl` sẽ giữ liên kết tạm vô hiệu hóa; thao tác bấm hoặc Enter không điều hướng. Điền URL HTTPS của App Store hoặc trang tải chính thức vào đúng biến này để bật cả hai liên kết, không cần sửa HTML hay nhãn nút.
 
 `launchOffer` là nội dung ưu đãi tùy chọn. Có thể nhập “Trải nghiệm demo miễn phí trong 3 tháng.” sau khi xác nhận điều kiện ra mắt. Mặc định để trống vì ứng dụng đang ở giai đoạn sắp ra mắt.
 
@@ -63,10 +63,10 @@ Logo đang dùng đúng ba file có sẵn: `lyrion-icon.png`, `lyrion-mark.png`,
 
 ## Thay nhận xét và ảnh đại diện
 
-`config.js` có 4 mục trong `reviews`. Điền `name`, `detail`, `text`, `avatar` cho từng mục. Để trống sẽ giữ nội dung có sẵn. Ví dụ một mục:
+`config.js` có 4 mục trong `reviews`. Điền `name`, `detail`, `text`, `avatar`, `rating` cho từng mục. Để trống nội dung sẽ giữ nội dung có sẵn; `rating` nhận 4 hoặc 5. Ví dụ một mục:
 
 ```js
-{ name: "Tên người dùng", detail: "Thông tin ngắn", text: "Phản hồi đã được cho phép sử dụng", avatar: "assets/reviews/nguoi-dung.jpg" }
+{ name: "Tên người dùng", detail: "Thông tin ngắn", text: "Phản hồi đã được cho phép sử dụng", avatar: "assets/reviews/nguoi-dung.jpg", rating: 5 }
 ```
 
 Thêm ảnh vào `assets/`; hỗ trợ PNG, JPG, WebP và AVIF. Khi ảnh trống hoặc tải lỗi, trang dùng chữ viết tắt của tên. Ba nhận xét xuất hiện cùng lúc: `1,2,3 → 2,3,4 → 3,4,1 → 4,1,2 → 1,2,3`. Màn hình nhỏ xếp ba thẻ theo chiều dọc, nút mũi tên vẫn hoạt động bằng chạm và bàn phím. Không tự chạy.
@@ -117,9 +117,15 @@ Hero ở đầu trang, hai ảnh phóng 7,5% từ điểm neo phía dưới rồ
 
 Mỗi lần mở hoặc tải lại trang, logo có sẵn `assets/lyrion-mark.png` xuất hiện ở giữa trên nền hiện tại. Logo giữ nguyên trong 3.000 ms rồi lớp intro mờ dần trong 500 ms để hiện trang chính; chế độ giảm chuyển động dùng 160 ms cho phần chuyển tiếp. Khi JavaScript bị tắt, trang chính hiển thị bình thường.
 
+Khi lớp logo bắt đầu mờ, cặp iPhone có sẵn tăng từ 72% lên kích thước cuối trong 2.400 ms. Trạng thái nhỏ được đặt trước khi hero xuất hiện, tránh chớp kích thước lớn; lớp chuyển động riêng giữ nguyên tỷ lệ khi cuộn và hover. Chế độ giảm chuyển động dùng opacity trong 200 ms.
+
 Nền giữ gradient và bảng màu hiện tại. Các đường nền SVG, vệt chuột và lớp sáng trang trí đã được gỡ.
 
-Phần nhận xét dùng nền trắng, chữ đen và nút chuyển màu đen. Chuyển nhận xét vẫn dùng opacity/transform trong 200 ms; thao tác bàn phím đổi tức thì.
+Phần nhận xét dùng nền của trang, tiêu đề trắng và từng thẻ trắng với chữ tối, đánh giá 4–5 sao. Chữ nhận xét là 20 px trên desktop và 18 px ở màn hình nhỏ. Chuyển nhận xét dùng opacity/transform trong 200 ms; thao tác bàn phím đổi tức thì. FAQ dùng nền đen cho câu hỏi, xám cho câu trả lời và cỡ chữ 15–16 px.
+
+Menu desktop có năm mục với vùng bấm lớn hơn và nền kính mờ; menu mobile giữ ba mục, kích thước và khoảng cách hiện có. Kính mờ chỉ dùng ở các lớp điều hướng, bảng thuật toán và cửa sổ xem ảnh; chế độ giảm độ trong suốt dùng nền đặc.
+
+Trang dùng `viewport-fit=cover`, nền gốc cùng màu theme và các giá trị `safe-area-inset-*` để phủ vùng notch nhưng vẫn đặt nội dung bên dưới mép an toàn, theo [hướng dẫn WebKit](https://webkit.org/blog/7929/designing-websites-for-iphone-x/). Kiểm tra trình duyệt mô phỏng được kích thước mobile và safe-area; giao diện thanh trạng thái của Safari cần đối chiếu trên iPhone thật.
 
 Thành phần xuất hiện một lần khi đi sâu hơn vào khung nhìn (cách đáy 80 px, ngưỡng 12%). Chuyển động đi lên 20 px với opacity trong 480 ms, dùng `--ease-out`; các thành phần cùng nhóm lệch nhau 60 ms, độ trễ từ 80 đến 260 ms. Heading, thẻ, form và từng hàng FAQ được chia thành các đơn vị riêng để tránh xuất hiện cùng lúc hoặc chồng nhiều transform. Focus bàn phím, chuyển nhận xét và liên kết điều hướng bằng bàn phím làm nội dung cần dùng hiện ngay.
 
