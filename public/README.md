@@ -37,7 +37,7 @@ Chưa cấu hình: API trả `503`, form báo đăng ký chưa mở và giữ d�
 
 Trang chính có thứ tự: chào mừng → tính năng → cá nhân hóa → đánh giá → đăng ký sớm → hỏi đáp. Nút chính “Đăng ký sớm” cuộn đến `#waitlist`. “Trở thành tester” trong menu mở `tester.html` ở tab mới.
 
-Trang hướng dẫn có phần chuẩn bị, năm bước theo thứ tự cài TestFlight, nhận lời mời, cài LyrionFitness, cập nhật, gửi phản hồi và phần xử lý sự cố. Trang không có thanh điều hướng riêng; liên kết về trang chủ nằm ở footer. Các bước vẫn hỗ trợ liên kết trực tiếp và bàn phím.
+Trang hướng dẫn đi thẳng từ phần giới thiệu vào năm bước theo thứ tự cài TestFlight, nhận lời mời, cài LyrionFitness, cập nhật, gửi phản hồi và phần xử lý sự cố. Liên kết tài liệu chính thức của Apple nằm trong mục “Không cài được ứng dụng” để đọc thêm khi cần. Trang không có thanh điều hướng riêng; liên kết về trang chủ nằm ở footer. Các bước vẫn hỗ trợ liên kết trực tiếp và bàn phím.
 
 Ảnh App Store được cắt bằng CSS. Các màn hình ứng dụng khác được dựng bằng HTML/CSS với logo Lyrion trên nền tím, không còn tên app, phiên bản hay dữ liệu không liên quan. Các hình là minh họa có mô tả truy cập, không phải nút hay form hoạt động trên website. Không có thanh chú thích đen dưới ảnh. Bước gửi phản hồi minh họa nơi chọn Send Beta Feedback, lựa chọn gửi ảnh và màn hình nhập nội dung với Submit; ảnh được chọn trước khi viết phản hồi, không thêm nút đính kèm không có trong luồng iPhone.
 

@@ -7,17 +7,8 @@ html.tester-document{scroll-padding-top:24px}
 .tester-lead{max-width:600px;margin:28px auto 0;font-size:17px;line-height:1.85;color:#c6bfd3}
 .tester-invite-note{font-size:14px;color:#bbb3ca;line-height:1.8}
 .tester-hero>.tester-invite-note{margin-top:28px}
-.tester-invite-note a,.tester-source a{color:var(--core);text-decoration:underline;text-underline-offset:4px}
+.tester-invite-note a{color:var(--core);text-decoration:underline;text-underline-offset:4px}
 .tester-invite-note a{display:inline-flex;align-items:center;min-height:44px}
-.tester-prerequisites{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:70px;padding:42px 0 60px;border-top:1px solid var(--hairline)}
-.tester-prerequisites .eyebrow{font-size:10px;margin-bottom:20px}
-.tester-prerequisites h2{font-size:32px;line-height:1.35;letter-spacing:-.045em}
-.tester-prerequisite-copy{font-size:14px;line-height:1.85;color:#c5bdd2}
-.tester-prerequisite-copy ul{list-style:none;margin:0;padding:0;display:grid;gap:18px}
-.tester-prerequisite-copy strong{font-weight:500;color:var(--text-bright)}
-.tester-prerequisite-copy>p{margin-top:22px}
-.tester-prerequisite-copy .tester-source{font-size:12px;color:#aca3bd}
-.tester-source a{display:inline-block;padding-block:8px}
 .tester-steps{list-style:none;padding:0;margin-block:0}
 .tester-step{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.92fr);align-items:center;gap:64px;padding:60px;border:1px solid var(--hairline);border-radius:30px;background:linear-gradient(145deg,#ffffff04,#00000020);box-shadow:inset 0 1px 0 #ffffff04;margin-bottom:24px;scroll-margin-top:0}
 .tester-step:nth-child(even){grid-template-columns:minmax(0,.92fr) minmax(0,1fr)}
@@ -97,12 +88,13 @@ html.tester-document{scroll-padding-top:24px}
 .tester-help-list section{padding-bottom:25px;border-bottom:1px solid var(--hairline)}
 .tester-help-list h3{font-size:17px;font-weight:500;line-height:1.5}
 .tester-help-list p{font-size:14px;color:#c5bdd2;margin-top:10px;line-height:1.85}
+.tester-help-links{display:flex;flex-direction:column;align-items:flex-start;margin-top:14px}
+.tester-help-links a{display:flex;align-items:center;min-height:44px;padding-block:8px;font-size:13px;line-height:1.7;color:var(--core);text-decoration:underline;text-underline-offset:4px}
+.tester-help-links a:hover{color:var(--text-bright)}
 .tester-closing{padding-block:90px 75px;text-align:center}
 .tester-closing h2{font-size:clamp(29px,3.5vw,45px);line-height:1.3}
 .tester-closing>.tester-invite-note{margin-top:24px}
 .tester-closing>.button{margin-top:27px;white-space:normal;text-align:center}
-.tester-apple-help{display:flex;align-items:center;justify-content:center;width:fit-content;min-height:44px;margin:18px auto 0;font-size:13px;line-height:1.7;color:#c3b9d3;text-underline-offset:4px}
-.tester-apple-help:hover{text-decoration:underline;color:var(--text-bright)}
 .tester-footer{display:flex;align-items:center;flex-direction:column;gap:16px;border-top:1px solid var(--hairline);padding-block:30px;text-align:center}
 .tester-footer>p{font-size:12px;color:#bfb5cd;line-height:1.8}
 .tester-footer .tester-support{margin-top:2px}
@@ -112,7 +104,7 @@ html.tester-document{scroll-padding-top:24px}
 .tester-step.tester-will-reveal.is-visible{opacity:1;transform:none}
 .tester-step.tester-reveal-instant{opacity:1;transform:none;transition:none}
 @media(min-width:768px) and (max-width:1023px){
-  .tester-prerequisites,.tester-troubleshooting{gap:35px}
+  .tester-troubleshooting{gap:35px}
   .tester-step,.tester-step:nth-child(even){gap:32px;padding:36px}
   .tester-step h2{font-size:30px}
   .testflight-current-apps{padding:26px 18px}
@@ -132,10 +124,6 @@ html.tester-document{scroll-padding-top:24px}
   .tester-hero .eyebrow{font-size:10px;margin-bottom:22px}
   .tester-lead{font-size:15px;margin-top:24px}
   .tester-hero>.tester-invite-note{font-size:13px;max-width:320px;margin:20px auto 0}
-  .tester-prerequisites{grid-template-columns:minmax(0,1fr);gap:26px;padding:34px 0 40px}
-  .tester-prerequisites h2{font-size:29px}
-  .tester-prerequisite-copy{font-size:14px}
-  .tester-prerequisite-copy .tester-source{font-size:12px}
   .tester-step,.tester-step:nth-child(even){grid-template-columns:minmax(0,1fr);gap:30px;padding:30px 23px;margin-bottom:20px;border-radius:25px}
   .tester-step:nth-child(even)>.tester-step-copy{order:0}
   .tester-step-number{margin-bottom:18px}
@@ -172,13 +160,12 @@ html.tester-document{scroll-padding-top:24px}
   .tester-closing h2{font-size:30px}
   .tester-closing>.tester-invite-note{font-size:13px;max-width:310px;margin-inline:auto}
   .tester-closing>.button{font-size:13px}
-  .tester-apple-help{font-size:12px;max-width:280px}
   .tester-footer{gap:14px;padding-block:28px}
 }
 @media(max-width:359px){
   .tester-page .wrap{width:calc(100% - 32px)}
   .tester-step,.tester-step:nth-child(even){padding:27px 20px}
-  .tester-step h2,.tester-closing h2,.tester-prerequisites h2{font-size:27px}
+  .tester-step h2,.tester-closing h2{font-size:27px}
   .tester-step-copy>.button{font-size:12px;padding-inline:14px}
   .testflight-app-row .lyrion-app-icon{width:35px}
   .testflight-app-row .mock-app-name{font-size:12px}
@@ -191,6 +178,6 @@ html.tester-document{scroll-padding-top:24px}
   .tester-step.tester-will-reveal{opacity:1;transform:none;transition:none}
 }
 @media(prefers-contrast:more){
-  .tester-step,.tester-prerequisites,.tester-help-list section{border-color:var(--core)}
-  .tester-step-copy>p,.tester-prerequisite-copy,.feedback-stage>p,.tester-help-list p{color:var(--text-bright)}
+  .tester-step,.tester-help-list section{border-color:var(--core)}
+  .tester-step-copy>p,.feedback-stage>p,.tester-help-list p{color:var(--text-bright)}
 }

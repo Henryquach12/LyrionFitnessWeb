@@ -613,11 +613,10 @@ try {
     !/[←-⇿✓★]/u.test(document.body.textContent) &&
     [...document.querySelectorAll('.tester-step')].every(step=>parseFloat(getComputedStyle(step).scrollMarginTop)<=40)
   `));
-  check("Tester guide explains prerequisites before the ordered steps", await evaluate(`(() => {
-    const prerequisites=document.querySelector('.tester-prerequisites'), steps=document.querySelector('.tester-steps');
-    return prerequisites && /Apple Account|Tài khoản Apple/i.test(prerequisites.textContent) && /iPhone/.test(prerequisites.textContent) &&
-      Boolean(prerequisites.compareDocumentPosition(steps)&Node.DOCUMENT_POSITION_FOLLOWING);
-  })()`));
+  check("Tester guide leads directly from the introduction into the ordered steps", await evaluate(`
+    !document.querySelector('.tester-prerequisites') &&
+    document.querySelector('.tester-hero').nextElementSibling.matches('.tester-steps')
+  `));
   check("Invitation guidance covers both email and public links", await evaluate(`(() => {
     const options=document.querySelector('#step-2 .invitation-options');
     return options && /email/i.test(options.textContent) && /công khai/i.test(options.textContent) && /View in TestFlight/.test(options.textContent) && /Accept/.test(document.querySelector('#step-2').textContent);
@@ -660,10 +659,13 @@ try {
       /Comments|Feedback|phản hồi|mô tả/i.test(compose.textContent) && /screenshot|ảnh chụp/i.test(document.querySelector('#step-5').textContent) &&
       !document.querySelector('#step-5 .tester-mockup a[href],#step-5 .tester-mockup button,#step-5 .tester-mockup input,#step-5 .tester-mockup textarea,#step-5 .tester-mockup [tabindex]');
   })()`));
-  check("Troubleshooting follows feedback and covers invitation, capacity, expiration and installation", await evaluate(`(() => {
+  check("Troubleshooting covers common issues and keeps Apple installation documentation available", await evaluate(`(() => {
     const help=document.querySelector('.tester-troubleshooting'), feedback=document.querySelector('#step-5');
+    const installation=[...help.querySelectorAll('section')].find(section=>section.querySelector('h3')?.textContent.trim()==='Không cài được ứng dụng');
     return help && Boolean(feedback.compareDocumentPosition(help)&Node.DOCUMENT_POSITION_FOLLOWING) &&
-      [/lời mời/i,/đầy|đủ người/i,/hết hạn/i,/không khả dụng|không còn|không có/i,/không cài|không thể cài/i].every(pattern=>pattern.test(help.textContent));
+      [/lời mời/i,/đầy|đủ người/i,/hết hạn/i,/không khả dụng|không còn|không có/i,/không cài|không thể cài/i].every(pattern=>pattern.test(help.textContent)) &&
+      installation?.querySelector('a[href="https://testflight.apple.com/"]') &&
+      installation.querySelector('a[href="https://support.apple.com/guide/iphone/get-apps-iphc90580097/ios"]') !== null;
   })()`));
   check("Tester guide links to Apple's TestFlight and explains invitation availability", await evaluate(`
     document.querySelector('#step-1 a[href="https://apps.apple.com/app/testflight/id899247664"]') !== null &&
