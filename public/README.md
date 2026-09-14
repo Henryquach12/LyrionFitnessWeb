@@ -37,7 +37,17 @@ Chưa cấu hình: API trả `503`, form báo đăng ký chưa mở và giữ d�
 
 Trang chính có thứ tự: chào mừng → tính năng → cá nhân hóa → đánh giá → đăng ký sớm → hỏi đáp. Nút chính “Đăng ký sớm” cuộn đến `#waitlist`. “Trở thành tester” trong menu mở `tester.html` ở tab mới.
 
-Trang hướng dẫn có năm bước và dùng bốn ảnh TestFlight được cung cấp, cắt khung bằng CSS. Các ảnh ứng dụng ví dụ của Apple được chú thích đúng ngữ cảnh. Hướng dẫn dựa trên [TestFlight của Apple](https://testflight.apple.com/).
+Trang hướng dẫn có phần chuẩn bị, năm bước theo thứ tự cài TestFlight, nhận lời mời, cài LyrionFitness, cập nhật, gửi phản hồi và phần xử lý sự cố. Trang không có thanh điều hướng riêng; liên kết về trang chủ nằm ở footer. Các bước vẫn hỗ trợ liên kết trực tiếp và bàn phím.
+
+Ảnh App Store được cắt bằng CSS. Các màn hình ứng dụng khác được dựng bằng HTML/CSS với logo Lyrion trên nền tím, không còn tên app, phiên bản hay dữ liệu không liên quan. Các hình là minh họa có mô tả truy cập, không phải nút hay form hoạt động trên website. Không có thanh chú thích đen dưới ảnh. Bước gửi phản hồi minh họa nơi chọn Send Beta Feedback, lựa chọn gửi ảnh và màn hình nhập nội dung với Submit; ảnh được chọn trước khi viết phản hồi, không thêm nút đính kèm không có trong luồng iPhone.
+
+Nội dung được đối chiếu tài liệu Apple ngày 14/09/2026:
+
+- [Hướng dẫn TestFlight cho người thử nghiệm](https://testflight.apple.com/): email và liên kết công khai, cài đặt, cập nhật, phản hồi và ảnh chụp màn hình.
+- [TestFlight trên App Store](https://apps.apple.com/app/testflight/id899247664) và [tải ứng dụng trên iPhone](https://support.apple.com/guide/iphone/get-apps-iphc90580097/ios): yêu cầu TestFlight và Apple Account; phiên bản Lyrion có thể yêu cầu iOS cao hơn.
+- [Tester nội bộ](https://developer.apple.com/help/app-store-connect/test-a-beta-version/add-internal-testers/) và [mời tester bên ngoài](https://developer.apple.com/help/app-store-connect/test-a-beta-version/invite-external-testers/): phân biệt nhóm nội bộ với người nhận email hoặc liên kết công khai; giới hạn và điều kiện của lời mời.
+- [Trạng thái build](https://developer.apple.com/help/app-store-connect/reference/app-uploads/app-build-statuses) và [ngừng thử nghiệm build](https://developer.apple.com/help/app-store-connect/test-a-beta-version/stop-testing-a-build/): thời hạn và bản không còn khả dụng.
+- [Điều khoản TestFlight](https://www.apple.com/legal/internet-services/itunes/testflight/) và [phản hồi của tester](https://developer.apple.com/help/app-store-connect/test-a-beta-version/view-tester-feedback/): crash log tự động và phản hồi do người dùng gửi thêm. Hướng dẫn không yêu cầu người thử nghiệm mở App Store Connect.
 
 Chưa có lời mời: các nút đăng ký trên trang hướng dẫn dẫn về `/#waitlist`. Khi có liên kết mời thật, điền `testFlightUrl` trong `config.js` theo dạng `https://testflight.apple.com/join/...`. Chỉ URL HTTPS trên tên miền TestFlight chính thức được bật. Không đặt thông tin bí mật trong cấu hình công khai.
 

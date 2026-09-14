@@ -1045,9 +1045,8 @@ details[open] .faq-plus:after{
 }
 
 .site-footer{
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:space-between;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
   align-items:center;
   gap:25px;
   padding-top:55px;
@@ -1057,6 +1056,7 @@ details[open] .faq-plus:after{
 }
 
 .site-footer .brand{
+  justify-self:start;
   font-size:17px;
 }
 
@@ -1072,8 +1072,16 @@ details[open] .faq-plus:after{
   font-size:10px;
 }
 
+.site-footer>p{
+  text-align:center;
+}
+
+.site-footer>span{
+  justify-self:end;
+}
+
 .site-footer .support-line{
-  flex-basis:100%;
+  grid-column:1/-1;
   text-align:center;
   font-size:11px;
   line-height:1.8;
@@ -2591,23 +2599,20 @@ main,
   .faq-items details>p{font-size:15px}
 
   .site-footer{
-    flex-wrap:wrap;
-    justify-content:center;
+    grid-template-columns:1fr;
+    justify-items:center;
     gap:20px;
     padding-block:40px 28px;
     text-align:center;
   }
 
   .site-footer .brand{
+    justify-self:center;
     justify-content:center;
-    width:100%;
-  }
-
-  .site-footer>p{
-    display:none;
   }
 
   .site-footer>span{
+    justify-self:center;
     font-size:9px;
   }
 

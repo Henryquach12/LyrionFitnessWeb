@@ -351,6 +351,11 @@ try {
     await delay(100);
     const layout = await evaluate("({width:innerWidth,scroll:document.documentElement.scrollWidth})");
     check("No horizontal overflow at " + width, layout.scroll <= width, layout);
+    check("Landing footer keeps the journey and contact centered at " + width, await evaluate(`(() => {
+      const footer=document.querySelector('.site-footer'), journey=footer.querySelector('p:not(.support-line)'), contact=footer.querySelector('.support-line');
+      const center=element=>{const r=element.getBoundingClientRect();return r.x+r.width/2};
+      return journey.getClientRects().length>0 && getComputedStyle(journey).textAlign==='center' && getComputedStyle(contact).textAlign==='center' && Math.abs(center(journey)-center(contact))<1 && Math.abs(center(contact)-center(footer))<1;
+    })()`));
   }
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
   await evaluate("window.scrollTo({top:document.querySelector('.waitlist-board').getBoundingClientRect().top+scrollY-innerHeight+50,behavior:'instant'})");
@@ -531,6 +536,14 @@ try {
     check(prefix + " FAQ uses larger readable question and answer type", faq.questionSize >= (width < 768 ? 15 : 16) && faq.answerSize >= (width < 768 ? 15 : 16), faq);
     await screenshot(prefix + "-faq.png");
     await evaluate("document.querySelector('.faq-items details').open=false");
+    await evaluate("document.querySelector('.site-footer').scrollIntoView({behavior:'instant',block:'center'})");
+    const mainFooter = await evaluate(`(() => {
+      const footer=document.querySelector('.site-footer'), journey=footer.querySelector('p:not(.support-line)'), contact=footer.querySelector('.support-line');
+      const box=element=>{const r=element.getBoundingClientRect();return {center:r.x+r.width/2,width:r.width,align:getComputedStyle(element).textAlign}};
+      return {footer:box(footer),journey:box(journey),contact:box(contact)};
+    })()`);
+    check(prefix + " journey and contact lines share the footer center", mainFooter.journey.align === 'center' && mainFooter.contact.align === 'center' && Math.abs(mainFooter.journey.center-mainFooter.contact.center)<1 && Math.abs(mainFooter.contact.center-mainFooter.footer.center)<1, mainFooter);
+    await screenshot(prefix + "-footer.png");
     if (width < 768) {
       check("Touch devices have no pointer or background effect", await evaluate("!matchMedia('(pointer:fine)').matches && !document.querySelector('.pointer-trail,.background-trace,.ambient-light,.wave-field,#pointer-glow')"));
       await evaluate("document.querySelector('.menu-toggle').click()");
@@ -588,19 +601,57 @@ try {
   await send("Page.navigate", { url:siteUrl + "/tester.html" });
   await waitFor("location.pathname === '/tester.html' && document.readyState === 'complete' && document.body.matches('.tester-page')", "tester guide");
   await evaluate("document.fonts.ready.then(() => true)");
-  check("Tester guide is a separate Vietnamese page with five ordered steps", await evaluate(`
-    document.documentElement.lang === 'vi' && document.querySelectorAll('h1').length === 1 &&
-    JSON.stringify([...document.querySelectorAll('ol.tester-steps > li.tester-step')].map(step => ({ id:step.id, title:step.querySelector('h2').textContent.trim() }))) === JSON.stringify([
-      {id:'step-1',title:'Tải TestFlight'}, {id:'step-2',title:'Mở lời mời thử nghiệm'}, {id:'step-3',title:'Tham gia chương trình thử nghiệm'},
-      {id:'step-4',title:'Cài đặt LyrionFitness'}, {id:'step-5',title:'Bắt đầu sử dụng và gửi phản hồi'}
-    ]) && getComputedStyle(document.body).fontFamily.includes('Be Vietnam Pro')
+  check("Tester guide has five Vietnamese steps from installation through feedback", await evaluate(`(() => {
+    const steps=[...document.querySelectorAll('ol.tester-steps > li.tester-step')];
+    const titles=[/TestFlight/i,/lời mời/i,/cài đặt/i,/cập nhật/i,/phản hồi/i];
+    return document.documentElement.lang==='vi' && document.querySelectorAll('h1').length===1 && steps.length===5 &&
+      steps.every((step,index)=>step.id==='step-'+(index+1) && titles[index].test(step.querySelector('h2').textContent)) &&
+      getComputedStyle(document.body).fontFamily.includes('Be Vietnam Pro');
+  })()`));
+  check("Tester navigation and decorative symbols are removed", await evaluate(`
+    !document.querySelector('.tester-header,.tester-roadmap,nav') &&
+    !/[←-⇿✓★]/u.test(document.body.textContent) &&
+    [...document.querySelectorAll('.tester-step')].every(step=>parseFloat(getComputedStyle(step).scrollMarginTop)<=40)
   `));
-  check("Tester guide uses the supplied screenshots in four corresponding steps", await evaluate(`
-    ['step-1','step-2','step-3','step-4'].every(id => {
-      const img = document.querySelector('#' + id + ' .tester-shot img');
-      return img && img.getAttribute('src').startsWith('assets/testflight/') && img.alt.trim().length > 20;
-    }) && document.querySelector('#step-5 .feedback-preview') !== null
+  check("Tester guide explains prerequisites before the ordered steps", await evaluate(`(() => {
+    const prerequisites=document.querySelector('.tester-prerequisites'), steps=document.querySelector('.tester-steps');
+    return prerequisites && /Apple Account|Tài khoản Apple/i.test(prerequisites.textContent) && /iPhone/.test(prerequisites.textContent) &&
+      Boolean(prerequisites.compareDocumentPosition(steps)&Node.DOCUMENT_POSITION_FOLLOWING);
+  })()`));
+  check("Invitation guidance covers both email and public links", await evaluate(`(() => {
+    const options=document.querySelector('#step-2 .invitation-options');
+    return options && /email/i.test(options.textContent) && /công khai/i.test(options.textContent) && /View in TestFlight/.test(options.textContent) && /Accept/.test(document.querySelector('#step-2').textContent);
+  })()`));
+  check("Update guidance explains newer builds and automatic updates", await evaluate(`
+    /Update/.test(document.querySelector('#step-4').textContent) && /Automatic Updates/.test(document.querySelector('#step-4').textContent)
   `));
+  check("Tester guide replaces unrelated app screenshots with accessible Lyrion mockups", await evaluate(`(() => {
+    const mockups=[...document.querySelectorAll('.tester-mockup')], store=document.querySelector('#step-1 .tester-shot img');
+    return store?.getAttribute('src')==='assets/testflight/app-store.png' && store.alt.trim().length>20 && mockups.length>=5 &&
+      mockups.every(mockup=>mockup.getAttribute('role')==='img' && (mockup.getAttribute('aria-label')||'').length>20 && /LyrionFitness/.test(mockup.textContent+' '+mockup.getAttribute('aria-label'))) &&
+      !document.querySelector('img[src$="accept-invitation.png"],img[src$="apps-list.png"],img[src$="invitation-code.png"]') &&
+      !/AwayFinder|TuneTrack|Foodspace/i.test(document.body.textContent);
+  })()`));
+  check("Current-testing cards show only LyrionFitness with no version text", await evaluate(`(() => {
+    const cards=[...document.querySelectorAll('.testflight-current-apps')];
+    return cards.length>0 && cards.every(card=>card.querySelectorAll('.testflight-app-row').length===1 && /LyrionFitness/.test(card.textContent) &&
+      !/version|phiên bản|\\d+\\.\\d+/i.test(card.textContent) && getComputedStyle(card).backgroundColor==='rgb(255, 255, 255)');
+  })()`));
+  check("Instructional visuals have no black caption tabs", await evaluate(`
+    !document.querySelector('.tester-tap-hint,.tester-action-label,.tester-figure figcaption,.tester-mockup figcaption')
+  `));
+  check("Step five illustrates opening feedback and composing a submitted report", await evaluate(`(() => {
+    const stages=[...document.querySelectorAll('#step-5 .feedback-stage')], action=document.querySelector('#step-5 .feedback-action'), compose=document.querySelector('#step-5 .feedback-compose');
+    return stages.length===2 && stages.every(stage=>stage.querySelector('h3') && stage.querySelector('.tester-mockup')) &&
+      action && /Send Beta Feedback/.test(action.textContent) && compose && /Submit/.test(compose.textContent) &&
+      /Comments|Feedback|phản hồi|mô tả/i.test(compose.textContent) && /screenshot|ảnh chụp/i.test(document.querySelector('#step-5').textContent) &&
+      !document.querySelector('#step-5 .tester-mockup a[href],#step-5 .tester-mockup button,#step-5 .tester-mockup input,#step-5 .tester-mockup textarea,#step-5 .tester-mockup [tabindex]');
+  })()`));
+  check("Troubleshooting follows feedback and covers invitation, capacity, expiration and installation", await evaluate(`(() => {
+    const help=document.querySelector('.tester-troubleshooting'), feedback=document.querySelector('#step-5');
+    return help && Boolean(feedback.compareDocumentPosition(help)&Node.DOCUMENT_POSITION_FOLLOWING) &&
+      [/lời mời/i,/đầy|đủ người/i,/hết hạn/i,/không khả dụng|không còn|không có/i,/không cài|không thể cài/i].every(pattern=>pattern.test(help.textContent));
+  })()`));
   check("Tester guide links to Apple's TestFlight and explains invitation availability", await evaluate(`
     document.querySelector('#step-1 a[href="https://apps.apple.com/app/testflight/id899247664"]') !== null &&
     document.querySelectorAll('.tester-invite-link').length === 3 &&
@@ -622,23 +673,61 @@ try {
         const f=frame.getBoundingClientRect(), img=frame.querySelector('img'), i=img.getBoundingClientRect();
         return { frameWidth:f.width, frameHeight:f.height, imageWidth:i.width, imageHeight:i.height, overflow:getComputedStyle(frame).overflow, loaded:img.complete && img.naturalWidth>0 };
       });
-      return { width:innerWidth, scroll:document.documentElement.scrollWidth, shots:clipped };
+      const mockups=[...document.querySelectorAll('.tester-mockup')].map(mockup=>{
+        const r=mockup.getBoundingClientRect();
+        return {left:r.left,right:r.right,width:r.width,height:r.height,client:mockup.clientWidth,scroll:mockup.scrollWidth};
+      });
+      const icons=[...document.querySelectorAll('.lyrion-app-icon')].map(icon=>{
+        const r=icon.getBoundingClientRect(),css=getComputedStyle(icon),img=icon.querySelector('img');
+        const radius=parseFloat(css.borderTopLeftRadius)*(css.borderTopLeftRadius.includes('%')?r.width/100:1);
+        return {width:r.width,height:r.height,background:css.backgroundColor,radius,overflow:css.overflow,src:img?.getAttribute('src'),loaded:img?.complete&&img.naturalWidth>0};
+      });
+      const hero=document.querySelector('.tester-hero').getBoundingClientRect();
+      const interactive=[...document.querySelectorAll('a.button,.tester-troubleshooting summary')].map(element=>{
+        const r=element.getBoundingClientRect();return {text:element.textContent.trim(),width:r.width,height:r.height};
+      });
+      return { width:innerWidth, scroll:document.documentElement.scrollWidth, shots:clipped, mockups, icons, heroTop:hero.top, interactive };
     })()`);
-    check("Tester guide stays within the viewport at " + width, guideLayout.scroll <= width, guideLayout);
+    check("Tester guide stays within the viewport at " + width, guideLayout.scroll <= width, {width:guideLayout.width,scroll:guideLayout.scroll});
     check("Tester screenshots load and remain cleanly clipped at " + width,
-      guideLayout.shots.length === 4 && guideLayout.shots.every(shot => shot.loaded && shot.frameWidth > 100 && shot.frameHeight > 80 && shot.imageWidth >= shot.frameWidth - 1 && shot.imageHeight >= shot.frameHeight - 1 && ['hidden','clip'].includes(shot.overflow)), guideLayout.shots);
-    if (width === 1440 || width === 390) {
-      await screenshot(prefix + "-tester.png");
-      await screenshot(prefix + "-tester-full.png", true);
-      await evaluate("document.querySelector('#step-3').scrollIntoView({behavior:'instant',block:'center'})");
-      await screenshot(prefix + "-tester-step.png");
-    }
+      guideLayout.shots.length === 1 && guideLayout.shots.every(shot => shot.loaded && shot.frameWidth > 100 && shot.frameHeight > 80 && shot.imageWidth >= shot.frameWidth - 1 && shot.imageHeight >= shot.frameHeight - 1 && ['hidden','clip'].includes(shot.overflow)), guideLayout.shots);
+    check("Lyrion app mockups fit without internal overflow at " + width, guideLayout.mockups.length>=5 && guideLayout.mockups.every(mockup=>mockup.width>100 && mockup.height>80 && mockup.left>=0 && mockup.right<=width && mockup.scroll<=mockup.client+1), guideLayout.mockups);
+    check("Lyrion icons use purple backgrounds with clipped rounded corners at " + width, guideLayout.icons.length>=5 && guideLayout.icons.every(icon=>{
+      const channels=icon.background.match(/\d+/g)?.map(Number)||[];
+      return icon.loaded && icon.src==='assets/lyrion-mark.png' && icon.width>=16 && Math.abs(icon.width-icon.height)<1 && icon.radius>icon.width*.15 && icon.radius<icon.width*.5 && ['hidden','clip'].includes(icon.overflow) && channels[2]>channels[0] && channels[0]>channels[1];
+    }), guideLayout.icons);
+    check("Tester top spacing has no empty navigation slot at " + width, guideLayout.heroTop>=0 && guideLayout.heroTop<80, {top:guideLayout.heroTop});
+    check("Tester primary actions and troubleshooting touch targets remain usable at " + width, guideLayout.interactive.every(control=>control.width>=44 && control.height>=44), guideLayout.interactive);
+    await screenshot(prefix + "-tester.png");
+    await screenshot(prefix + "-tester-full.png", true);
+    await evaluate("document.querySelector('#step-2').scrollIntoView({behavior:'instant',block:'center'})");
+    await delay(80);
+    await screenshot(prefix + "-tester-invitation.png");
+    await evaluate("document.querySelector('#step-3').scrollIntoView({behavior:'instant',block:'center'})");
+    await delay(80);
+    await screenshot(prefix + "-tester-step.png");
+    await evaluate("document.querySelector('#step-5').scrollIntoView({behavior:'instant',block:'start'})");
+    await delay(80);
+    await screenshot(prefix + "-tester-feedback.png");
+    await evaluate("document.querySelector('.feedback-compose').scrollIntoView({behavior:'instant',block:'center'})");
+    await delay(80);
+    await screenshot(prefix + "-tester-feedback-compose.png");
+    await evaluate("document.querySelector('.tester-footer').scrollIntoView({behavior:'instant',block:'center'})");
+    const footer=await evaluate(`(() => {
+      const footer=document.querySelector('.tester-footer'), lines=[...footer.querySelectorAll('p')];
+      const center=element=>{const r=element.getBoundingClientRect();return r.x+r.width/2};
+      return {center:center(footer),lines:lines.map(line=>({text:line.textContent.trim(),center:center(line),align:getComputedStyle(line).textAlign}))};
+    })()`);
+    check("Tester journey and contact are centered at " + width, footer.lines.length>=2 && footer.lines.every(line=>line.align==='center' && Math.abs(line.center-footer.center)<1), footer);
+    await screenshot(prefix + "-tester-footer.png");
   }
-  await evaluate("document.querySelector('.tester-header .brand').focus();document.querySelector('#step-2 .tester-invite-link').focus()");
+  await send("Page.reload", {ignoreCache:false});
+  await waitFor("document.readyState==='complete' && document.querySelector('#step-2').classList.contains('tester-will-reveal')", "fresh tester guide for keyboard access");
+  await evaluate("document.querySelector('#step-2 .tester-invite-link').focus()");
   check("Keyboard access reveals the tester step immediately", await evaluate("document.activeElement.matches('#step-2 .tester-invite-link') && getComputedStyle(document.querySelector('#step-2')).opacity === '1'"));
   await evaluate("location.hash='#step-5'");
   await delay(30);
-  check("Tester roadmap exposes a deep-linked step immediately", await evaluate("document.querySelector('#step-5').classList.contains('tester-reveal-instant') && getComputedStyle(document.querySelector('#step-5')).opacity === '1'"));
+  check("Tester deep links expose the requested step immediately without a navigation bar", await evaluate("document.querySelector('#step-5').classList.contains('tester-reveal-instant') && getComputedStyle(document.querySelector('#step-5')).opacity === '1' && !document.querySelector('nav')"));
   await send("Emulation.setEmulatedMedia", { features:[{name:"prefers-reduced-motion",value:"reduce"}] });
   await delay(50);
   check("Tester guide respects a reduced motion preference change", await evaluate("[...document.querySelectorAll('.tester-step')].every(step => getComputedStyle(step).opacity === '1' && getComputedStyle(step).transform === 'none') && getComputedStyle(document.documentElement).scrollBehavior === 'auto'"));
@@ -647,7 +736,7 @@ try {
   await send("Emulation.setScriptExecutionDisabled", { value:true });
   await send("Page.reload", { ignoreCache:true });
   await waitFor("document.readyState === 'complete' && document.body.matches('.tester-page')", "tester guide without JavaScript");
-  check("Tester guide remains fully visible and usable without JavaScript", await evaluate("[...document.querySelectorAll('.tester-step')].every(step => getComputedStyle(step).opacity === '1' && step.getBoundingClientRect().height > 0) && document.querySelector('.tester-invite-link').getAttribute('href') === '/#waitlist' && document.querySelector('.tester-header .brand').getAttribute('href') === '/'"));
+  check("Tester guide remains fully visible and usable without JavaScript", await evaluate("[...document.querySelectorAll('.tester-step')].every(step => getComputedStyle(step).opacity === '1' && step.getBoundingClientRect().height > 0) && document.querySelector('.tester-invite-link').getAttribute('href') === '/#waitlist' && document.querySelector('.tester-footer a[href=\"/\"]') !== null"));
   await send("Emulation.setScriptExecutionDisabled", { value:false });
   check("No browser errors", errors.length === 0, errors);
   await writeFile(path.join(artifactDir, "verification.json"), JSON.stringify({ results, errors, expectedNetworkErrors }, null, 2));
