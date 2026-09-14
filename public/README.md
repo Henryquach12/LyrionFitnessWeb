@@ -1,12 +1,13 @@
 # LyrionFitness
 
-Landing page cho ứng dụng tập gym và theo dõi calo LyrionFitness. HTML, CSS, JavaScript và máy chủ Node.js, không cần cài thư viện.
+Trang giới thiệu LyrionFitness, đăng ký sớm và hướng dẫn tham gia TestFlight. HTML, CSS, JavaScript và máy chủ Node.js, không cần cài thư viện.
 
 ## Xem trang
 
 Dùng Node.js 22 trở lên:
 
 ```sh
+cd public
 npm start
 ```
 
@@ -14,9 +15,9 @@ Mở http://127.0.0.1:4173. Chưa cần Supabase để xem giao diện. Mở tr�
 
 ## Kết nối waitlist với Supabase
 
-1. Trong dự án Supabase của bạn, mở **SQL Editor** và chạy `supabase/waitlist.sql`. File tạo bảng PostgreSQL `public.waitlist_signups`, email duy nhất, bật Row Level Security và chặn quyền đọc/ghi công khai.
-2. Sao chép `.env.example` thành `.env` trong thư mục gốc.
-3. Điền **Project URL** vào `SUPABASE_URL` và **secret key** vào `SUPABASE_SECRET_KEY`. Lấy key trong **Settings → API Keys**. Hai vị trí này được ghi rõ trong file mẫu.
+1. Kiểm tra cấu trúc hiện có bằng `../supabase/inspect-waitlist.sql` trong **SQL Editor**. Nếu chưa có bảng đăng ký phù hợp, chạy `../supabase/waitlist.sql`. File tạo `public.waitlist_signups` với email duy nhất, bật Row Level Security và chặn quyền đọc/ghi công khai. Nếu đã có bảng phù hợp khác, điều chỉnh endpoint theo bảng đó trước khi tạo mới.
+2. Dùng `.env` trong thư mục gốc của repository (cùng cấp với `public/`). Máy chủ đọc file này dù chạy từ `public/`; biến môi trường hosting được ưu tiên.
+3. Điền **Project URL** vào `SUPABASE_URL` và **secret key** vào `SUPABASE_SECRET_KEY`. Lấy key trong **Settings → API Keys**. File `../.env.example` ghi rõ các biến cần dùng.
 4. Chạy lại `npm start`. Gửi thử tên và email, rồi kiểm tra bản ghi trong **Table Editor → waitlist_signups**.
 
 ```dotenv
@@ -32,17 +33,13 @@ Khóa `sb_secret_…` được gửi qua header `apikey`; chỉ khóa `service_r
 
 Chưa cấu hình: API trả `503`, form báo đăng ký chưa mở và giữ dữ liệu để thử lại. Chỉ báo thành công khi Supabase chấp nhận yêu cầu. Mã này lưu danh sách chờ; việc gửi email thông báo ra mắt được thực hiện sau từ danh sách đó.
 
-## Thêm link App Store
+## Đăng ký sớm và TestFlight
 
-Trong `config.js`, điền URL HTTPS chính thức vào `appStoreUrl`. Ví dụ định dạng:
+Trang chính có thứ tự: chào mừng → tính năng → cá nhân hóa → đánh giá → đăng ký sớm → hỏi đáp. Nút chính “Đăng ký sớm” cuộn đến `#waitlist`. “Trở thành tester” trong menu mở `tester.html` ở tab mới.
 
-```js
-appStoreUrl: "https://apps.apple.com/vn/app/lyrionfitness/id123456789"
-```
+Trang hướng dẫn có năm bước và dùng bốn ảnh TestFlight được cung cấp, cắt khung bằng CSS. Các ảnh ứng dụng ví dụ của Apple được chú thích đúng ngữ cảnh. Hướng dẫn dựa trên [TestFlight của Apple](https://testflight.apple.com/).
 
-ID trên chỉ minh họa định dạng; thay bằng URL thật của bạn. Cả hai liên kết tải luôn hiển thị “Tải tại đây”. Để trống `appStoreUrl` sẽ giữ liên kết tạm vô hiệu hóa; thao tác bấm hoặc Enter không điều hướng. Điền URL HTTPS của App Store hoặc trang tải chính thức vào đúng biến này để bật cả hai liên kết, không cần sửa HTML hay nhãn nút.
-
-`launchOffer` là nội dung ưu đãi tùy chọn. Có thể nhập “Trải nghiệm demo miễn phí trong 3 tháng.” sau khi xác nhận điều kiện ra mắt. Mặc định để trống vì ứng dụng đang ở giai đoạn sắp ra mắt.
+Chưa có lời mời: các nút đăng ký trên trang hướng dẫn dẫn về `/#waitlist`. Khi có liên kết mời thật, điền `testFlightUrl` trong `config.js` theo dạng `https://testflight.apple.com/join/...`. Chỉ URL HTTPS trên tên miền TestFlight chính thức được bật. Không đặt thông tin bí mật trong cấu hình công khai.
 
 ## Thay bốn màn hình app
 
@@ -76,16 +73,21 @@ Thêm ảnh vào `assets/`; hỗ trợ PNG, JPG, WebP và AVIF. Khi ảnh trốn
 - `index.html`: nội dung tiếng Việt và cấu trúc trang.
 - `styles.css`: bảng màu Apex, layout desktop/mobile, chuyển động, màn hình minh họa.
 - `previews.js`: bốn giao diện minh họa và dữ liệu mẫu.
-- `script.js`: menu mobile, tab giải thích thuật toán, phóng to ảnh, bàn phím và cấu hình phát hành.
+- `script.js`: menu mobile, tab giải thích thuật toán, phóng to ảnh và bàn phím.
 - `motion.js`: tỷ lệ ảnh hero theo vị trí cuộn.
 - `intro.css`, `intro.js`: màn hình logo khi tải trang và chuyển tiếp vào nội dung chính.
 - `reviews.js`: xoay vòng bốn nhận xét, thay nội dung và ảnh đại diện.
 - `waitlist.js`: gửi form, thông báo đang gửi/thành công/lỗi và cho phép thử lại.
-- `config.js`: cấu hình công khai cho App Store, ưu đãi, ảnh và nhận xét.
+- `config.js`: cấu hình công khai cho lời mời TestFlight, ảnh và nhận xét.
+- `tester.html`, `tester.css`, `tester.js`: hướng dẫn năm bước tham gia thử nghiệm.
 - `server.mjs`: phục vụ trang và API waitlist.
-- `waitlist-api.mjs`: kiểm tra yêu cầu và ghi Supabase từ máy chủ.
-- `.env.example`: chỗ điền cấu hình Supabase phía máy chủ.
-- `supabase/waitlist.sql`: bảng PostgreSQL và quyền truy cập.
+- `waitlist-core.mjs`: kiểm tra yêu cầu và ghi Supabase, dùng chung cho Node và Cloudflare.
+- `waitlist-api.mjs`: adapter HTTP cho Node.
+- `worker.mjs`, `wrangler.toml`: API và cấu hình Cloudflare Workers.
+- `site-files.mjs`, `tools/build-assets.mjs`: danh sách file công khai và bước chuẩn bị `dist/` để triển khai.
+- `../.env`: cấu hình Supabase phía máy chủ, không được commit.
+- `../supabase/inspect-waitlist.sql`: kiểm tra metadata bảng hiện có, không đọc email.
+- `../supabase/waitlist.sql`: bảng PostgreSQL và quyền truy cập.
 - `tools/verify.mjs`: kiểm tra trình duyệt bằng Chrome cài sẵn, không cần thư viện.
 - `tools/waitlist.test.mjs`: kiểm tra API với phản hồi Supabase mô phỏng.
 
@@ -103,7 +105,11 @@ Kiểm tra trình duyệt cần Google Chrome trên Windows; có thể đặt bi
 
 ## Đưa lên hosting
 
-Để form hoạt động, dùng hosting có Node.js 22+, chạy `npm start`, không cần bước build. Đặt `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SITE_URL` và `HOST=0.0.0.0` trong phần biến môi trường của hosting. `SITE_URL` là origin HTTPS chính xác của trang, ví dụ `https://lyrionfitness.com`. Dùng cổng `PORT` mà hosting cấp. Đổi `og:image` thành URL tuyệt đối khi có tên miền.
+Cloudflare Workers dùng `public/wrangler.toml` với một Worker xử lý `/api/waitlist`. Bước build tự chép các file công khai trong `site-files.mjs` cùng ảnh và font vào `public/dist/`, gồm cả trang tester, sitemap, robots và file xác minh Google. Mã backend, công cụ và `.env` không được chép vào thư mục này. Từ thư mục gốc, triển khai bằng `wrangler deploy --config public/wrangler.toml`. Thư mục `dist/` được tạo lại khi build và không được commit.
+
+Đặt `SUPABASE_URL` và `SUPABASE_SECRET_KEY` trong **runtime secrets** của Worker `lyrionfitnessweb`. File `.env` cục bộ và biến môi trường của bước build không tự trở thành runtime secrets. `SITE_URL` tùy chọn có thể khóa origin chính xác; nếu để trống, Worker chỉ nhận origin cùng URL yêu cầu. Bảng Supabase cũng phải sẵn sàng trước khi đăng ký hoạt động.
+
+Nếu dùng hosting Node.js 22+, chạy `npm start` từ `public/`, không cần bước build. Đặt `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SITE_URL` và `HOST=0.0.0.0` trong phần biến môi trường của hosting. `SITE_URL` là origin HTTPS chính xác của trang, ví dụ `https://lyrionfitness.com`. Dùng cổng `PORT` mà hosting cấp.
 
 Giới hạn trong bộ nhớ là 30 yêu cầu / địa chỉ kết nối / 10 phút, có giới hạn dung lượng body và trường bẫy bot. Sau reverse proxy hoặc khi chạy nhiều máy chủ, đặt thêm rate limit tại hosting; mã không tin `X-Forwarded-For` từ khách truy cập. Dữ liệu form và lỗi chi tiết của Supabase không được ghi vào log hay trả ra trình duyệt.
 
@@ -123,10 +129,12 @@ Nền giữ gradient và bảng màu hiện tại. Các đường nền SVG, v�
 
 Phần nhận xét dùng nền của trang, tiêu đề trắng và từng thẻ trắng với chữ tối, đánh giá 4–5 sao. Chữ nhận xét là 20 px trên desktop và 18 px ở màn hình nhỏ. Chuyển nhận xét dùng opacity/transform trong 200 ms; thao tác bàn phím đổi tức thì. FAQ dùng nền đen cho câu hỏi, xám cho câu trả lời và cỡ chữ 15–16 px.
 
-Menu desktop có năm mục với vùng bấm lớn hơn và nền kính mờ; menu mobile giữ ba mục, kích thước và khoảng cách hiện có. Kính mờ chỉ dùng ở các lớp điều hướng, bảng thuật toán và cửa sổ xem ảnh; chế độ giảm độ trong suốt dùng nền đặc.
+Menu thêm “Trở thành tester” sau “Hỏi đáp” trên desktop và ở cuối danh sách mobile. Kích thước nút Menu và khoảng cách các mục mobile được giữ nguyên. Kính mờ dùng ở các lớp điều hướng, bảng thuật toán và cửa sổ xem ảnh; chế độ giảm độ trong suốt dùng nền đặc.
 
-Trang dùng `viewport-fit=cover`, nền gốc cùng màu theme và các giá trị `safe-area-inset-*` để phủ vùng notch nhưng vẫn đặt nội dung bên dưới mép an toàn, theo [hướng dẫn WebKit](https://webkit.org/blog/7929/designing-websites-for-iphone-x/). Kiểm tra trình duyệt mô phỏng được kích thước mobile và safe-area; giao diện thanh trạng thái của Safari cần đối chiếu trên iPhone thật.
+Vùng trên cùng trên mobile, màu nền gốc và `theme-color` dùng chung `#251d38`; lớp nền hòa dần vào gradient hiện tại bên dưới menu. Trang dùng `viewport-fit=cover` và các giá trị `safe-area-inset-*` để phủ vùng notch nhưng vẫn đặt nội dung bên dưới mép an toàn, theo [hướng dẫn WebKit](https://webkit.org/blog/7929/designing-websites-for-iphone-x/). Kiểm tra trình duyệt mô phỏng được kích thước mobile và safe-area; giao diện thanh trạng thái của Safari cần đối chiếu trên iPhone thật.
 
 Thành phần xuất hiện một lần khi đi sâu hơn vào khung nhìn (cách đáy 80 px, ngưỡng 12%). Chuyển động đi lên 20 px với opacity trong 480 ms, dùng `--ease-out`; các thành phần cùng nhóm lệch nhau 60 ms, độ trễ từ 80 đến 260 ms. Heading, thẻ, form và từng hàng FAQ được chia thành các đơn vị riêng để tránh xuất hiện cùng lúc hoặc chồng nhiều transform. Focus bàn phím, chuyển nhận xét và liên kết điều hướng bằng bàn phím làm nội dung cần dùng hiện ngay.
 
 Chế độ giảm chuyển động bỏ co giãn theo cuộn và độ trễ xuất hiện. Hover không chạy trên thiết bị cảm ứng. Không cài thêm thư viện animation.
+
+Ba lựa chọn cá nhân hóa giữ bố cục dọc trong một khung tối. Thanh nền được chọn trượt theo chiều dọc bằng `transform` trong 250 ms với `--ease-out`; bấm liên tiếp sẽ đổi hướng từ vị trí hiện tại. Điều hướng bàn phím và chế độ giảm chuyển động chuyển trạng thái ngay.

@@ -3,11 +3,10 @@ import { readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createWaitlistHandler } from "./waitlist-api.mjs";
+import { publicFiles, assetTypes } from "./site-files.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const mime = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".avif": "image/avif", ".woff2": "font/woff2", ".ttf": "font/ttf", ".svg": "image/svg+xml" };
-const publicFiles = new Set(["index.html", "styles.css", "intro.css", "intro.js", "script.js", "motion.js", "reviews.js", "waitlist.js", "previews.js", "config.js"]);
-const assetTypes = new Set([".png", ".jpg", ".jpeg", ".webp", ".avif", ".woff2", ".ttf", ".svg"]);
+const mime = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".txt": "text/plain; charset=utf-8", ".xml": "application/xml; charset=utf-8", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".avif": "image/avif", ".woff2": "font/woff2", ".ttf": "font/ttf", ".svg": "image/svg+xml" };
 
 export function createSiteServer(options = {}) {
   const waitlist = createWaitlistHandler(options);
@@ -39,9 +38,14 @@ export function createSiteServer(options = {}) {
   return server;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  try { process.loadEnvFile(path.join(root, ".env")); }
+export function loadSiteEnvironment(loadEnvFile = process.loadEnvFile) {
+  // Keep credentials in the repository root, outside the site asset directory.
+  try { loadEnvFile(path.resolve(root, "..", ".env")); }
   catch (error) { if (error.code !== "ENOENT") throw new Error("Cannot read the server .env file."); }
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  loadSiteEnvironment();
   const port = Number(process.env.PORT || 4173);
   const host = process.env.HOST || "127.0.0.1";
   createSiteServer().listen(port, host, () => console.log(`LyrionFitness: http://${host}:${port}`));

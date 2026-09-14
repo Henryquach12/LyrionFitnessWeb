@@ -30,37 +30,6 @@
 
   document.querySelectorAll("[data-preview]").forEach(el => renderPreview(el, el.dataset.preview));
 
-  let storeUrl = null;
-  try {
-    const url = new URL(config.appStoreUrl);
-    if (url.protocol === "https:" && !url.username && !url.password) storeUrl = url.href;
-  } catch { /* An empty or invalid URL keeps the download links inactive. */ }
-
-  document.querySelectorAll("[data-store-link]").forEach(link => {
-    link.href = storeUrl || "#";
-    if (storeUrl) {
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.removeAttribute("aria-disabled");
-    } else {
-      link.setAttribute("aria-disabled", "true");
-      link.removeAttribute("target");
-      link.removeAttribute("rel");
-    }
-    link.addEventListener("click", event => {
-      if (link.getAttribute("aria-disabled") === "true") event.preventDefault();
-    });
-  });
-  document.querySelectorAll("[data-store-label]").forEach(el => { el.textContent = "Tải tại đây"; });
-  if (storeUrl) {
-    document.querySelectorAll("[data-release-answer]").forEach(el => { el.textContent = "Bạn có thể tải LyrionFitness qua nút Tải tại đây trên trang này."; });
-  }
-
-  if (typeof config.launchOffer === "string" && config.launchOffer.trim()) {
-    const offer = document.querySelector("[data-launch-offer]");
-    offer.textContent = config.launchOffer.trim();
-    offer.hidden = false;
-  }
   document.querySelector("[data-year]").textContent = new Date().getFullYear();
 
   const toggle = document.querySelector(".menu-toggle");
@@ -87,7 +56,13 @@
   matchMedia("(min-width: 768px)").addEventListener("change", closeMenu);
 
   const tabs = [...document.querySelectorAll("[data-tab]")];
+  const tabIndicator = document.querySelector(".intelligence-tab-indicator");
   function activateTab(tab, focus = false) {
+    // Equal-height rows keep alignment on resize. A CSS transition retargets
+    // from the current position, even when another tab is tapped mid-slide.
+    // Keyboard selection remains immediate, including when it interrupts a slide.
+    tabIndicator.classList.toggle("is-instant", focus);
+    tabIndicator.style.transform = `translateY(${tabs.indexOf(tab) * 100}%)`;
     tabs.forEach(item => {
       const selected = item === tab;
       item.setAttribute("aria-selected", String(selected));
@@ -97,7 +72,7 @@
     if (focus) tab.focus();
   }
   tabs.forEach((tab, index) => {
-    tab.addEventListener("click", () => activateTab(tab));
+    tab.addEventListener("click", event => activateTab(tab, event.detail === 0));
     tab.addEventListener("keydown", event => {
       let next;
       if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (index + 1) % tabs.length;
@@ -168,8 +143,7 @@
       ".reviews-heading .eyebrow, .reviews-heading h2, .reviews-controls",
       ".review-group > .review-card",
       ".faq > div:first-child > *",
-      ".faq-items > details",
-      ".download > .download-icon, .download > .eyebrow, .download > h2, .download > p"
+      ".faq-items > details"
     ].map(selector => [...document.querySelectorAll(selector)]);
     const candidates = new Set(groups.flat());
     // Reveal semantic units only: never stack an entrance on its revealed parent.

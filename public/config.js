@@ -1,9 +1,8 @@
 /* Cấu hình công khai. Không đặt Supabase API key hoặc bí mật trong file này. */
 window.LYRION_CONFIG = {
-  // URL HTTPS tải app (App Store hoặc trang tải chính thức). Để trống để tạm vô hiệu hóa cả hai CTA.
-  appStoreUrl: "",
-  // Chỉ bật ưu đãi khi đã xác nhận điều kiện phát hành.
-  launchOffer: "",
+  // Liên kết mời https://testflight.apple.com/join/... chính thức khi mở thử nghiệm.
+  // Để trống: trang hướng dẫn dẫn tới đăng ký sớm để nhận lời mời.
+  testFlightUrl: "",
   // Từng mục tương ứng nhận xét 1–4. Để trống để giữ nội dung có sẵn.
   // Ví dụ avatar: "assets/reviews/minh-thu.jpg". Ảnh lỗi sẽ về chữ viết tắt.
   // Điểm đánh giá (rating) chỉ nhận 4 hoặc 5 sao.

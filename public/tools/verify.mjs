@@ -229,7 +229,7 @@ try {
   check("Reviews use the theme background and white headings", await evaluate(`
     getComputedStyle(document.querySelector('.reviews')).backgroundColor === 'rgba(0, 0, 0, 0)' &&
     [...document.querySelectorAll('#reviews-title, #reviews-title span, .reviews-heading .eyebrow')].every(element => getComputedStyle(element).color === 'rgb(255, 255, 255)') &&
-    document.querySelector('#reviews-title').innerText.replace(/\\s+/g, ' ').trim() === 'Một kế hoạch riêng. Vừa với cuộc sống.'
+    document.querySelector('#reviews-title').innerText.replace(/\\s+/g, ' ').trim() === 'Người dùng Lyrion Đánh giá thế nào?'
   `));
   check("Review cards retain white surfaces and dark readable copy", await evaluate(`
     [...document.querySelectorAll('.review-card')].every(card =>
@@ -251,7 +251,7 @@ try {
   check("Three visible reviews out of four", await evaluate("document.querySelectorAll('.review-card:not([hidden])').length === 3 && document.querySelectorAll('.review-card').length === 4"));
   check("Marked captions, hero footnote, arrows and privacy section removed", await evaluate("!document.querySelector('.hero-footnote,.hero-bottom,.gallery-note,.visual-caption,.illustrative-label,#privacy,.hero-actions [aria-hidden],.preview-open [aria-hidden]')"));
   check("Visible sample-content notes are removed", await evaluate("!document.querySelector('[data-reviews-note],.reviews-note') && !/Nội dung mẫu|Giao diện minh họa|dữ liệu minh họa/i.test(document.body.textContent)"));
-  check("Waitlist replaces privacy section", await evaluate("document.querySelector('#waitlist').previousElementSibling.id === 'intelligence' && document.querySelector('#waitlist').nextElementSibling.id === 'reviews'"));
+  check("Main sections follow the product, reviews, signup and FAQ order", await evaluate("JSON.stringify([...document.querySelector('main').children].filter(section => section.id).map(section => section.id)) === JSON.stringify(['top','features','intelligence','reviews','waitlist','faq'])"));
   check("Page, app previews and review avatars share Be Vietnam Pro", await evaluate(`
     (() => {
       const normalize = value => value.split(',').map(family => family.trim()).join(',');
@@ -270,27 +270,27 @@ try {
       blur: css.backdropFilter, background: css.backgroundColor, shadow: css.boxShadow };
   })()`);
   check("Desktop island navigation is larger with comfortable click targets", desktopNav.height >= 64 && desktopNav.width > 650 && desktopNav.width < 1100 && desktopNav.padding >= 18 && desktopNav.gap > 18 && desktopNav.links.every(link => link.height >= 40 && link.fontSize >= 13), desktopNav);
-  check("Desktop navigation includes useful waitlist and FAQ anchors", JSON.stringify(desktopNav.links.map(link => link.href).sort()) === JSON.stringify(['#features', '#intelligence', '#reviews', '#waitlist', '#faq'].sort()), desktopNav.links);
+  check("Desktop navigation places the tester guide immediately after FAQ", JSON.stringify(desktopNav.links.map(link => link.href)) === JSON.stringify(['#features', '#intelligence', '#reviews', '#faq', 'tester.html', '#waitlist']), desktopNav.links);
   check("Desktop menu has restrained translucent glass styling", desktopNav.blur.includes('blur(') && desktopNav.background.startsWith('rgba(') && desktopNav.shadow !== 'none', desktopNav);
   check("Four app previews", await evaluate("document.querySelectorAll('.preview-grid [data-preview]').length === 4"));
-  check("All download CTAs are inactive links with the requested label", await evaluate(`
-    document.querySelectorAll('[data-store-link]').length >= 2 && [...document.querySelectorAll('[data-store-link]')].every(link =>
-      link.tagName === 'A' && link.getAttribute('href') === '#' && link.getAttribute('aria-disabled') === 'true' && link.textContent.trim() === 'Tải tại đây')
+  check("Hero invites early signup and the obsolete download section is gone", await evaluate(`
+    document.querySelector('.hero-actions .button').getAttribute('href') === '#waitlist' &&
+    document.querySelector('.hero-actions .button').textContent.trim() === 'Đăng ký sớm' &&
+    !document.querySelector('#download,.download,[data-store-link]') && !document.body.textContent.includes('Tải tại đây')
   `));
-  await evaluate("window.scrollTo({top:250,behavior:'instant'})");
-  const disabledClick = await evaluate(`(() => {
-    const before = { url: location.href, top: scrollY };
-    const prevented = [...document.querySelectorAll('[data-store-link]')].every(link => !link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })));
-    return { prevented, before, after: { url: location.href, top: scrollY } };
-  })()`);
-  check("Inactive download clicks are prevented without jumping or navigating", disabledClick.prevented && JSON.stringify(disabledClick.before) === JSON.stringify(disabledClick.after), disabledClick);
-  await evaluate("document.querySelector('[data-store-link]').focus({preventScroll:true});window.__downloadKeyboard={url:location.href,top:scrollY}");
-  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13, text: "\r", unmodifiedText: "\r" });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13 });
-  check("Inactive download Enter key does not navigate or jump", await evaluate("location.href === window.__downloadKeyboard.url && scrollY === window.__downloadKeyboard.top"));
-  await evaluate("document.activeElement.blur();window.scrollTo({top:0,behavior:'instant'})");
+  check("Tester navigation opens a separate protected tab and hero has only signup", await evaluate(`
+    (() => {
+      const link = document.querySelector('.site-nav a[href="tester.html"]');
+      return link && link.textContent.trim() === 'Trở thành tester' && link.target === '_blank' && link.relList.contains('noopener') && document.querySelectorAll('.hero-actions a').length === 1;
+    })()
+  `));
+  check("Signup privacy text and final support contact match the requested copy", await evaluate(`
+    document.querySelector('.form-note').textContent.trim() === 'Email của bạn sẽ không bị chia sẻ cho bên thứ ba' &&
+    document.querySelector('.site-footer').textContent.includes('Mọi thông tin liên hệ: support@lyrionfitness.com') &&
+    document.querySelector('.site-footer a[href="mailto:support@lyrionfitness.com"]') !== null
+  `));
   check("No broken eager images", await evaluate("Promise.all([...document.images].filter(img => img.loading !== 'lazy').map(img => img.decode().then(()=>true,()=>false))).then(results=>results.every(Boolean))"));
-  check("All section anchor targets exist", await evaluate("[...document.querySelectorAll('a[href^=\"#\"]:not([data-store-link])')].every(a => document.getElementById(a.getAttribute('href').slice(1)))"));
+  check("All section anchor targets exist", await evaluate("[...document.querySelectorAll('a[href^=\"#\"]')].every(a => document.getElementById(a.getAttribute('href').slice(1)))"));
   // Recorded before the prompt changes, with the same bundled font loaded.
   // Keep these essentials inline so verification does not depend on local artifacts.
   for (const [width, headerX, headerWidth, buttonX, menuX, menuWidth] of [
@@ -319,9 +319,9 @@ try {
       return { box: [r.x, r.y, r.width, r.height], padding: css.padding, background: css.backgroundColor,
         links: links.map(link => ({ href: link.getAttribute('href'), font: getComputedStyle(link).fontSize, padding: getComputedStyle(link).padding })) };
     })()`);
-    check("Mobile dropdown retains original geometry and three original links at " + width,
-      closeTo(opened.box, [menuX, 74, menuWidth, 195.171875]) && opened.padding === '15px' && opened.background === 'rgb(26, 22, 36)' &&
-      JSON.stringify(opened.links.map(link => link.href)) === JSON.stringify(['#features', '#intelligence', '#reviews']) &&
+    check("Mobile dropdown preserves its placement and adds the tester guide at " + width,
+      closeTo(opened.box.slice(0, 3), [menuX, 74, menuWidth]) && opened.box[3] > 195 && opened.box[3] < 270 && opened.padding === '15px' && opened.background === 'rgb(26, 22, 36)' &&
+      JSON.stringify(opened.links.map(link => link.href)) === JSON.stringify(['#features', '#intelligence', '#reviews', 'tester.html']) &&
       opened.links.every(link => link.font === '16px' && link.padding === '14px'), opened);
     await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
     await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
@@ -342,7 +342,7 @@ try {
       paddingTop: body.paddingTop, paddingBottom: body.paddingBottom,
       header: { x: header.x, y: header.y, width: header.width, height: header.height } };
   })()`);
-  check("Notch viewport extends the theme background through the top safe area", notch.viewport.includes('viewport-fit=cover') && notch.theme === '#262136' && notch.root === 'rgb(38, 33, 54)' && notch.bodyTop === 0 && notch.background.includes('linear-gradient'), notch);
+  check("Notch viewport extends the matching purple background through the top safe area", notch.viewport.includes('viewport-fit=cover') && notch.theme === '#251d38' && notch.root === 'rgb(37, 29, 56)' && notch.bodyTop === 0 && notch.background.includes('linear-gradient') && notch.background.includes('rgb(37, 29, 56)'), notch);
   check("Notch insets preserve the mobile menu size and safe-region offset", notch.paddingTop === '59px' && notch.paddingBottom === '34px' && notch.header.x === 20 && notch.header.y === 71 && notch.header.width === 350 && notch.header.height === 54, notch);
   await screenshot("mobile-safe-area.png");
   await send("Emulation.setSafeAreaInsetsOverride", { insets: { top: 0, right: 0, bottom: 0, left: 0 } });
@@ -372,11 +372,62 @@ try {
   check("App mockup content fits", screenOverflow.length === 0, screenOverflow);
   const h1 = await evaluate("({height:document.querySelector('h1').getBoundingClientRect().height,line:parseFloat(getComputedStyle(document.querySelector('h1')).lineHeight),cta:document.querySelector('.hero-actions').getBoundingClientRect().bottom})");
   check("Hero heading two lines and CTA above fold", h1.height <= h1.line * 2 + 2 && h1.cta < 900, h1);
+  const inspectTabs = `(() => {
+    const group = document.querySelector('.intelligence-tabs');
+    const indicator = group.querySelector('.intelligence-tab-indicator');
+    const buttons = [...group.querySelectorAll('[role="tab"]')];
+    const box = element => { const r = element.getBoundingClientRect(); return { x:r.x, y:r.y, width:r.width, height:r.height }; };
+    const active = buttons.find(button => button.getAttribute('aria-selected') === 'true');
+    const position = box(indicator), target = box(active);
+    return { group:box(group), background:getComputedStyle(group).backgroundColor, indicator:position,
+      duration:getComputedStyle(indicator).transitionDuration, active:active.id,
+      aligned:Math.abs(position.y + position.height / 2 - target.y - target.height / 2) < 1 && Math.abs(position.x + position.width / 2 - target.x - target.width / 2) < 1,
+      buttons:buttons.map(button => ({ ...box(button), label:button.textContent.trim(), selected:button.getAttribute('aria-selected'), tabIndex:button.tabIndex })) };
+  })()`;
+  const clickTab = async name => {
+    const point = await evaluate(`(() => { const r = document.querySelector('[data-tab="${name}"]').getBoundingClientRect(); return {x:r.x + r.width / 2, y:r.y + r.height / 2}; })()`);
+    await send("Input.dispatchMouseEvent", { type:"mouseMoved", ...point });
+    await send("Input.dispatchMouseEvent", { type:"mousePressed", ...point, button:"left", clickCount:1 });
+    await send("Input.dispatchMouseEvent", { type:"mouseReleased", ...point, button:"left", clickCount:1 });
+  };
+  for (const width of [1440, 390, 320]) {
+    await send("Emulation.setDeviceMetricsOverride", { width, height:900, deviceScaleFactor:1, mobile:width < 768 });
+    await evaluate("document.querySelector('[data-tab=\"adapt\"]').click();document.querySelector('.intelligence-tabs').scrollIntoView({behavior:'instant',block:'center'})");
+    await delay(400);
+    const initial = await evaluate(inspectTabs);
+    check("Tabs retain three evenly divided vertical rows inside one frame at " + width,
+      initial.background !== 'rgba(0, 0, 0, 0)' && initial.aligned && initial.buttons.every(button => Math.abs(button.width - initial.buttons[0].width) < 1 && Math.abs(button.height - initial.buttons[0].height) < 1 && Math.abs(button.x - initial.buttons[0].x) < 1) &&
+      initial.buttons.every((button, index) => index === 0 || button.y >= initial.buttons[index - 1].y + initial.buttons[index - 1].height - 1) &&
+      ['Thích ứng', 'Cân bằng', 'Tự do'].every((label, index) => initial.buttons[index].label.startsWith(label)), initial);
+    await clickTab('freedom');
+    await delay(90);
+    const middle = await evaluate(inspectTabs);
+    await delay(350);
+    const settled = await evaluate(inspectTabs);
+    check("Active tab indicator slides through intermediate positions at " + width,
+      middle.indicator.y > initial.indicator.y + 1 && middle.indicator.y < settled.indicator.y - 1 && settled.aligned && settled.active === 'tab-freedom',
+      { start:initial.indicator.y, middle:middle.indicator.y, finish:settled.indicator.y, aligned:settled.aligned, duration:middle.duration });
+    await clickTab('adapt');
+    await delay(75);
+    await clickTab('balance');
+    await delay(75);
+    await clickTab('freedom');
+    await delay(400);
+    const interrupted = await evaluate(inspectTabs);
+    check("Rapid tab changes settle on the final selection at " + width,
+      interrupted.aligned && interrupted.active === 'tab-freedom' && interrupted.buttons.filter(button => button.selected === 'true' && button.tabIndex === 0).length === 1 &&
+      await evaluate("!document.getElementById('panel-freedom').hidden && document.getElementById('panel-adapt').hidden && document.getElementById('panel-balance').hidden"), interrupted);
+  }
+  await send("Emulation.setDeviceMetricsOverride", { width:1440, height:900, deviceScaleFactor:1, mobile:false });
+  await delay(400);
+  check("Active tab indicator stays aligned after resizing back to desktop", (await evaluate(inspectTabs)).aligned);
   await evaluate("document.querySelector('[data-tab=\"balance\"]').click()");
   check("Algorithm tab shows selected panel", await evaluate("!document.getElementById('panel-balance').hidden && document.getElementById('panel-adapt').hidden"));
   await evaluate("document.querySelector('[data-tab=\"balance\"]').focus()");
   await send("Input.dispatchKeyEvent", { type: "keyDown", key: "ArrowRight", code: "ArrowRight" });
   check("Algorithm keyboard navigation", await evaluate("document.querySelector('[data-tab=\"freedom\"]').getAttribute('aria-selected') === 'true' && document.activeElement.id === 'tab-freedom'"));
+  await send("Input.dispatchKeyEvent", { type:"keyDown", key:"Home", code:"Home" });
+  check("Algorithm Home key selects the first tab and panel", await evaluate("document.activeElement.id === 'tab-adapt' && document.querySelector('#tab-adapt').getAttribute('aria-selected') === 'true' && !document.querySelector('#panel-adapt').hidden"));
   await evaluate("document.querySelector('[data-tab=\"adapt\"]').click()");
   await evaluate("document.querySelector('[data-open-preview=\"welcome\"]').click()");
   check("Screenshot dialog opens", await evaluate("document.querySelector('dialog').open"));
@@ -430,6 +481,13 @@ try {
   await delay(100);
   check("Hero scale restores on return to top", await evaluate("new DOMMatrix(getComputedStyle(document.querySelector('.hero-phones')).transform).a > 1.07"));
 
+  await evaluate("document.querySelector('.hero-actions .button').focus({preventScroll:true})");
+  await send("Input.dispatchKeyEvent", { type:"keyDown", key:"Enter", code:"Enter", windowsVirtualKeyCode:13, text:"\r", unmodifiedText:"\r" });
+  await send("Input.dispatchKeyEvent", { type:"keyUp", key:"Enter", code:"Enter", windowsVirtualKeyCode:13 });
+  await waitFor("location.hash === '#waitlist' && document.querySelector('#waitlist').getBoundingClientRect().top < innerHeight / 2", "early signup navigation");
+  await delay(250);
+  check("Early signup works by keyboard and scrolls to the existing form", await evaluate("location.hash === '#waitlist' && getComputedStyle(document.documentElement).scrollBehavior === 'smooth' && document.querySelector('#waitlist-form').getBoundingClientRect().top < innerHeight && document.querySelector('#waitlist-form').getBoundingClientRect().bottom > 0"));
+
   await evaluate("window.__realFetch=window.fetch;window.__formCalls=0;window.fetch=()=>{window.__formCalls++;return new Promise(r=>window.__resolveForm=r)};document.querySelector('#waitlist-name').value='Nguyễn An';document.querySelector('#waitlist-email').value='an@example.com';document.querySelector('#waitlist-form').requestSubmit();document.querySelector('#waitlist-form').requestSubmit()");
   check("Waitlist prevents duplicate submissions while pending", await evaluate("window.__formCalls === 1 && document.querySelector('.waitlist-fields').disabled && document.querySelector('#waitlist-form').getAttribute('aria-busy') === 'true'"));
   await evaluate("window.__resolveForm(new Response(JSON.stringify({ok:true}),{status:200,headers:{'Content-Type':'application/json'}}))");
@@ -451,6 +509,12 @@ try {
     await screenshot(prefix + "-full.png", true);
     await evaluate("document.querySelector('#waitlist').scrollIntoView({behavior:'instant',block:'center'})");
     await delay(150);
+    const consent = await evaluate(`(() => {
+      const note = document.querySelector('.form-note'), form = document.querySelector('#waitlist-form');
+      const n = note.getBoundingClientRect(), f = form.getBoundingClientRect();
+      return { align:getComputedStyle(note).textAlign, offset:Math.abs(n.x + n.width / 2 - f.x - f.width / 2), width:n.width, formWidth:f.width };
+    })()`);
+    check(prefix + " privacy statement is centered within the signup form", consent.align === 'center' && consent.offset < 1 && consent.width <= consent.formWidth + 1, consent);
     await screenshot(prefix + "-waitlist.png");
     await evaluate("document.querySelector('#reviews').scrollIntoView({behavior:'instant',block:'center'})");
     await delay(800);
@@ -480,9 +544,12 @@ try {
   await delay(100);
   check("Reduced motion preference respected", await evaluate("getComputedStyle(document.documentElement).scrollBehavior === 'auto' && [...document.querySelectorAll('.will-reveal')].every(el=>getComputedStyle(el).opacity === '1')"));
   check("Reduced motion keeps effects absent and disables scroll scale", await evaluate("!document.querySelector('.pointer-trail,.background-trace,.ambient-light,.wave-field,#pointer-glow') && getComputedStyle(document.querySelector('.hero-phones')).transform === 'none'"));
-  await evaluate("window.LYRION_CONFIG.appStoreUrl='https://example.com/lyrion/download';window.LYRION_CONFIG.screenshots.welcome='assets/lyrion-icon.png'");
+  await evaluate("document.querySelector('[data-tab=\"freedom\"]').click()");
+  await delay(50);
+  const reducedTabs = await evaluate(inspectTabs);
+  check("Reduced motion changes tabs without a sliding animation", reducedTabs.aligned && reducedTabs.duration.split(',').every(duration => parseFloat(duration) <= .001), reducedTabs);
+  await evaluate("window.LYRION_CONFIG.screenshots.welcome='assets/lyrion-icon.png'");
   await evaluate("new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='script.js?config-test';s.onload=resolve;s.onerror=reject;document.head.append(s)})");
-  check("One HTTPS app URL activates every download link without changing labels", await evaluate("[...document.querySelectorAll('[data-store-link]')].every(link => link.href === window.LYRION_CONFIG.appStoreUrl && !link.hasAttribute('aria-disabled') && link.textContent.trim() === 'Tải tại đây' && link.target === '_blank' && link.rel.includes('noopener'))"));
   check("Real screenshot config replaces preview", await evaluate("document.querySelector('[data-preview=\"welcome\"] img').getAttribute('src') === 'assets/lyrion-icon.png'"));
   await evaluate("window.LYRION_CONFIG.reviews[0].avatar='assets/lyrion-icon.png';window.LYRION_CONFIG.reviews[0].name='Ảnh mới';new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='reviews.js?config-test';s.onload=resolve;s.onerror=reject;document.head.append(s)})");
   check("Review avatar can be replaced from config", await evaluate("document.querySelector('[data-review=\"0\"] .avatar img').getAttribute('src').endsWith('assets/lyrion-icon.png') && document.querySelector('[data-review=\"0\"] strong').textContent === 'Ảnh mới'"));
@@ -516,6 +583,72 @@ try {
   check("Unavailable intro logo releases the page and keyboard focus", expectedNetworkErrors.length > 0 && await evaluate("getComputedStyle(document.documentElement).overflow !== 'hidden' && document.activeElement.matches('.hero-actions .button')"), { expectedBlockedRequests: expectedNetworkErrors.length });
   blockingIntroLogo = false;
   await send("Network.setBlockedURLs", { urls: [] });
+  await send("Emulation.setEmulatedMedia", { features:[{name:"prefers-reduced-motion",value:"no-preference"}] });
+  await send("Emulation.setDeviceMetricsOverride", { width:1440, height:900, deviceScaleFactor:1, mobile:false });
+  await send("Page.navigate", { url:siteUrl + "/tester.html" });
+  await waitFor("location.pathname === '/tester.html' && document.readyState === 'complete' && document.body.matches('.tester-page')", "tester guide");
+  await evaluate("document.fonts.ready.then(() => true)");
+  check("Tester guide is a separate Vietnamese page with five ordered steps", await evaluate(`
+    document.documentElement.lang === 'vi' && document.querySelectorAll('h1').length === 1 &&
+    JSON.stringify([...document.querySelectorAll('ol.tester-steps > li.tester-step')].map(step => ({ id:step.id, title:step.querySelector('h2').textContent.trim() }))) === JSON.stringify([
+      {id:'step-1',title:'Tải TestFlight'}, {id:'step-2',title:'Mở lời mời thử nghiệm'}, {id:'step-3',title:'Tham gia chương trình thử nghiệm'},
+      {id:'step-4',title:'Cài đặt LyrionFitness'}, {id:'step-5',title:'Bắt đầu sử dụng và gửi phản hồi'}
+    ]) && getComputedStyle(document.body).fontFamily.includes('Be Vietnam Pro')
+  `));
+  check("Tester guide uses the supplied screenshots in four corresponding steps", await evaluate(`
+    ['step-1','step-2','step-3','step-4'].every(id => {
+      const img = document.querySelector('#' + id + ' .tester-shot img');
+      return img && img.getAttribute('src').startsWith('assets/testflight/') && img.alt.trim().length > 20;
+    }) && document.querySelector('#step-5 .feedback-preview') !== null
+  `));
+  check("Tester guide links to Apple's TestFlight and explains invitation availability", await evaluate(`
+    document.querySelector('#step-1 a[href="https://apps.apple.com/app/testflight/id899247664"]') !== null &&
+    document.querySelectorAll('.tester-invite-link').length === 3 &&
+    [...document.querySelectorAll('.tester-invite-link')].every(link => link.getAttribute('href') === '/#waitlist') &&
+    [...document.querySelectorAll('.tester-invite-note')].every(note => note.textContent.includes('chưa mở'))
+  `));
+  check("Tester guide anchor targets exist and external links protect the opener", await evaluate(`
+    [...document.querySelectorAll('a[href^="#"]')].every(link => document.getElementById(link.getAttribute('href').slice(1))) &&
+    [...document.querySelectorAll('a[target="_blank"]')].every(link => link.relList.contains('noopener')) &&
+    document.querySelector('.tester-support').textContent.trim() === 'Mọi thông tin liên hệ: support@lyrionfitness.com'
+  `));
+  for (const [width,height,prefix] of [[1440,900,'desktop'],[768,900,'tablet'],[390,844,'mobile'],[320,844,'small-mobile']]) {
+    await send("Emulation.setDeviceMetricsOverride", { width,height,deviceScaleFactor:1,mobile:width<768 });
+    await send("Emulation.setTouchEmulationEnabled", { enabled:width<768 });
+    await evaluate("(async()=>{for(let y=0;y<document.documentElement.scrollHeight;y+=600){window.scrollTo({top:y,behavior:'instant'});await new Promise(r=>setTimeout(r,30));}window.scrollTo({top:0,behavior:'instant'});return true})()");
+    await delay(500);
+    const guideLayout = await evaluate(`(() => {
+      const clipped = [...document.querySelectorAll('.tester-shot')].map(frame => {
+        const f=frame.getBoundingClientRect(), img=frame.querySelector('img'), i=img.getBoundingClientRect();
+        return { frameWidth:f.width, frameHeight:f.height, imageWidth:i.width, imageHeight:i.height, overflow:getComputedStyle(frame).overflow, loaded:img.complete && img.naturalWidth>0 };
+      });
+      return { width:innerWidth, scroll:document.documentElement.scrollWidth, shots:clipped };
+    })()`);
+    check("Tester guide stays within the viewport at " + width, guideLayout.scroll <= width, guideLayout);
+    check("Tester screenshots load and remain cleanly clipped at " + width,
+      guideLayout.shots.length === 4 && guideLayout.shots.every(shot => shot.loaded && shot.frameWidth > 100 && shot.frameHeight > 80 && shot.imageWidth >= shot.frameWidth - 1 && shot.imageHeight >= shot.frameHeight - 1 && ['hidden','clip'].includes(shot.overflow)), guideLayout.shots);
+    if (width === 1440 || width === 390) {
+      await screenshot(prefix + "-tester.png");
+      await screenshot(prefix + "-tester-full.png", true);
+      await evaluate("document.querySelector('#step-3').scrollIntoView({behavior:'instant',block:'center'})");
+      await screenshot(prefix + "-tester-step.png");
+    }
+  }
+  await evaluate("document.querySelector('.tester-header .brand').focus();document.querySelector('#step-2 .tester-invite-link').focus()");
+  check("Keyboard access reveals the tester step immediately", await evaluate("document.activeElement.matches('#step-2 .tester-invite-link') && getComputedStyle(document.querySelector('#step-2')).opacity === '1'"));
+  await evaluate("location.hash='#step-5'");
+  await delay(30);
+  check("Tester roadmap exposes a deep-linked step immediately", await evaluate("document.querySelector('#step-5').classList.contains('tester-reveal-instant') && getComputedStyle(document.querySelector('#step-5')).opacity === '1'"));
+  await send("Emulation.setEmulatedMedia", { features:[{name:"prefers-reduced-motion",value:"reduce"}] });
+  await delay(50);
+  check("Tester guide respects a reduced motion preference change", await evaluate("[...document.querySelectorAll('.tester-step')].every(step => getComputedStyle(step).opacity === '1' && getComputedStyle(step).transform === 'none') && getComputedStyle(document.documentElement).scrollBehavior === 'auto'"));
+  await evaluate("window.LYRION_CONFIG.testFlightUrl='https://testflight.apple.com/join/LyrionQA';new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='tester.js?config-test';s.onload=resolve;s.onerror=reject;document.head.append(s)})");
+  check("A configured official TestFlight invitation activates every guide invitation", await evaluate("document.querySelectorAll('.tester-invite-link').length === 3 && [...document.querySelectorAll('.tester-invite-link')].every(link => link.href === 'https://testflight.apple.com/join/LyrionQA' && link.target === '_blank' && link.relList.contains('noopener'))"));
+  await send("Emulation.setScriptExecutionDisabled", { value:true });
+  await send("Page.reload", { ignoreCache:true });
+  await waitFor("document.readyState === 'complete' && document.body.matches('.tester-page')", "tester guide without JavaScript");
+  check("Tester guide remains fully visible and usable without JavaScript", await evaluate("[...document.querySelectorAll('.tester-step')].every(step => getComputedStyle(step).opacity === '1' && step.getBoundingClientRect().height > 0) && document.querySelector('.tester-invite-link').getAttribute('href') === '/#waitlist' && document.querySelector('.tester-header .brand').getAttribute('href') === '/'"));
+  await send("Emulation.setScriptExecutionDisabled", { value:false });
   check("No browser errors", errors.length === 0, errors);
   await writeFile(path.join(artifactDir, "verification.json"), JSON.stringify({ results, errors, expectedNetworkErrors }, null, 2));
   if (results.some(result => !result.passed)) process.exitCode = 1;

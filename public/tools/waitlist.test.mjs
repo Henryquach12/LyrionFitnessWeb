@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createSiteServer } from "../server.mjs";
+import { createSiteServer, loadSiteEnvironment } from "../server.mjs";
+import { createWorker } from "../worker.mjs";
+import { fileURLToPath } from "node:url";
 
 const valid = { name: "  Nguyễn   An  ", email: "  An@Example.com " };
 const configured = { SUPABASE_URL: "https://waitlist-test.supabase.co", SUPABASE_SECRET_KEY: "sb_secret_test_only_not_a_real_key" };
@@ -114,12 +116,70 @@ test("Rate limiting is bounded and resets after the window", async t => {
 
 test("Environment, backend, SQL, tools and archives are never served", async t => {
   const { origin } = await site(t, { env: configured });
-  for (const pathname of ["/.env", "/.env.example", "/server.mjs", "/waitlist-api.mjs", "/supabase/waitlist.sql", "/tools/waitlist.test.mjs", "/LyrionFitness-website.zip", "/assets/../.env", "/assets/.env", "/assets/%2e%2e%5cserver.mjs"]) {
+  for (const pathname of ["/.env", "/.env.example", "/server.mjs", "/waitlist-api.mjs", "/waitlist-core.mjs", "/worker.mjs", "/wrangler.toml", "/supabase/waitlist.sql", "/tools/waitlist.test.mjs", "/LyrionFitness-website.zip", "/assets/../.env", "/assets/.env", "/assets/%2e%2e%5cserver.mjs"]) {
     assert.equal((await fetch(origin + pathname)).status, 404, pathname);
   }
-  for (const pathname of ["/", "/config.js", "/reviews.js", "/waitlist.js", "/assets/Roboto.ttf"]) {
+  for (const pathname of ["/", "/config.js", "/reviews.js", "/waitlist.js", "/robots.txt", "/sitemap.xml", "/google1195f44339be5198.html", "/assets/Roboto.ttf"]) {
     const response = await fetch(origin + pathname);
     assert.equal(response.status, 200, pathname);
     if (!pathname.endsWith(".ttf")) assert.ok(!(await response.text()).includes(configured.SUPABASE_SECRET_KEY));
   }
+});
+
+test("Server loads .env from the repository root independently of working directory", () => {
+  let loaded;
+  loadSiteEnvironment(filename => { loaded = filename; });
+  assert.equal(loaded, fileURLToPath(new URL("../../.env", import.meta.url)));
+  assert.doesNotThrow(() => loadSiteEnvironment(() => { throw Object.assign(new Error(), { code: "ENOENT" }); }));
+  assert.throws(() => loadSiteEnvironment(() => { throw Object.assign(new Error("private path"), { code: "EACCES" }); }), { message: "Cannot read the server .env file." });
+});
+
+function workerRequest(data = valid, headers = {}) {
+  return new Request("https://lyrion.example/api/waitlist", {
+    method: "POST", headers: { "Content-Type": "application/json", Origin: "https://lyrion.example", "CF-Connecting-IP": "192.0.2.1", ...headers },
+    body: JSON.stringify(data)
+  });
+}
+
+test("Cloudflare API saves once and treats duplicates identically without overwriting", async () => {
+  const rows = new Map();
+  const worker = createWorker({ fetchImpl: async (_, options) => {
+    const row = JSON.parse(options.body);
+    assert.equal(options.headers.Prefer, "resolution=ignore-duplicates,return=minimal");
+    if (!rows.has(row.email)) rows.set(row.email, row);
+    return new Response(null, { status: 201 });
+  } });
+  const first = await worker.fetch(workerRequest({ name: "An", email: "AN@example.com" }), configured);
+  const repeated = await worker.fetch(workerRequest({ name: "Other name", email: "an@example.com" }), configured);
+  assert.equal(first.status, 200);
+  assert.equal(repeated.status, 200);
+  assert.deepEqual(await first.json(), await repeated.json());
+  assert.equal(rows.size, 1);
+  assert.equal(rows.get("an@example.com").name, "An");
+});
+
+test("Cloudflare rejects cross-origin, invalid and oversized requests before Supabase", async () => {
+  const worker = createWorker({ fetchImpl: () => assert.fail("must not call Supabase") });
+  assert.equal((await worker.fetch(workerRequest(valid, { Origin: "https://other.example" }), configured)).status, 403);
+  assert.equal((await worker.fetch(workerRequest(valid, { "Sec-Fetch-Site": "cross-site" }), configured)).status, 403);
+  assert.equal((await worker.fetch(workerRequest({ name: "An", email: "invalid" }), configured)).status, 400);
+  assert.equal((await worker.fetch(workerRequest({ name: "A".repeat(5000), email: "an@example.com" }), configured)).status, 413);
+});
+
+test("Cloudflare only routes the signup API and delegates assets to its binding", async () => {
+  let assetRequests = 0;
+  const worker = createWorker();
+  const env = { ASSETS: { fetch: async request => { assetRequests++; return new Response(new URL(request.url).pathname); } } };
+  assert.equal(await (await worker.fetch(new Request("https://lyrion.example/tester.html"), env)).text(), "/tester.html");
+  assert.equal((await worker.fetch(new Request("https://lyrion.example/api/missing"), env)).status, 404);
+  assert.equal((await worker.fetch(new Request("https://lyrion.example/api/waitlist"), env)).status, 405);
+  assert.equal((await worker.fetch(workerRequest(), env)).status, 503);
+  assert.equal(assetRequests, 1);
+});
+
+test("Cloudflare rate limits by the runtime visitor address instead of one shared proxy", async () => {
+  const worker = createWorker();
+  for (let i = 0; i < 30; i++) assert.equal((await worker.fetch(workerRequest(), {})).status, 503);
+  assert.equal((await worker.fetch(workerRequest(), {})).status, 429);
+  assert.equal((await worker.fetch(workerRequest(valid, { "CF-Connecting-IP": "192.0.2.2" }), {})).status, 503);
 });
