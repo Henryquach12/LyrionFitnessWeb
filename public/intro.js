@@ -110,9 +110,9 @@
       if (finished) return;
       clearTimeout(fallback);
       intro.classList.add("is-ready");
-      // CSS owns the 3000ms hold and fade, so loading work cannot stutter it.
+      // CSS owns the 1000ms hold and fade, so loading work cannot stutter it.
       // Release the modal even if animations are disabled by a user stylesheet.
-      fallback = setTimeout(finish, 3600);
+      fallback = setTimeout(finish, 1600);
     }));
   }, finish);
 })();

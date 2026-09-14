@@ -131,7 +131,7 @@ Trang và màn hình app minh họa dùng Be Vietnam Pro, với các độ đậ
 
 Hero ở đầu trang, hai ảnh phóng 7,5% từ điểm neo phía dưới rồi về tỷ lệ gốc khi cuộn xuống. Trở về đầu trang sẽ khôi phục tỷ lệ lớn. Hover ảnh nhấc nhẹ lên trong 250 ms với `--ease-out` có sẵn.
 
-Mỗi lần mở hoặc tải lại trang, logo có sẵn `assets/lyrion-mark.png` xuất hiện ở giữa trên nền hiện tại. Logo giữ nguyên trong 3.000 ms rồi lớp intro mờ dần trong 500 ms để hiện trang chính; chế độ giảm chuyển động dùng 160 ms cho phần chuyển tiếp. Khi JavaScript bị tắt, trang chính hiển thị bình thường.
+Mỗi lần mở hoặc tải lại trang, logo có sẵn `assets/lyrion-mark.png` xuất hiện ở giữa trên nền hiện tại. Logo giữ nguyên trong 1.000 ms rồi lớp intro mờ dần trong 500 ms để hiện trang chính; chế độ giảm chuyển động dùng 160 ms cho phần chuyển tiếp. Khi JavaScript bị tắt, trang chính hiển thị bình thường.
 
 Khi lớp logo bắt đầu mờ, cặp iPhone có sẵn tăng từ 72% lên kích thước cuối trong 2.400 ms. Trạng thái nhỏ được đặt trước khi hero xuất hiện, tránh chớp kích thước lớn; lớp chuyển động riêng giữ nguyên tỷ lệ khi cuộn và hover. Chế độ giảm chuyển động dùng opacity trong 200 ms.
 

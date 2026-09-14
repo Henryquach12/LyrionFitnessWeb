@@ -168,7 +168,7 @@ try {
     const ready = await evaluate("window.__introAudit.ready");
     check(label + " intro immediately covers viewport with an opaque modal", first.modal && first.opacity === 1 && first.box.x === 0 && first.box.y === 0 && first.box.width === first.viewport.width && first.box.height === first.viewport.height, first);
     check(label + " existing logo is loaded and centered", ready.logo.src === "assets/lyrion-mark.png" && ready.logo.decoded && ready.logo.width > 80 && Math.abs(ready.logo.centerX - ready.viewport.width / 2) < 1 && Math.abs(ready.logo.centerY - ready.viewport.height / 2) < 1, ready.logo);
-    check(label + " intro holds exactly three seconds", ready.delay === "3s" && ready.duration === (reduced ? "0.16s" : "0.5s"), { delay: ready.delay, duration: ready.duration });
+    check(label + " intro holds exactly one second", ready.delay === "1s" && ready.duration === (reduced ? "0.16s" : "0.5s"), { delay: ready.delay, duration: ready.duration });
     if (imageName) await screenshot(imageName);
     await waitFor("Boolean(document.querySelector('.hero-actions .button'))", "main page markup");
     const layoutDuringIntro = await evaluate("({width:document.querySelector('.hero').getBoundingClientRect().width,x:document.querySelector('.hero').getBoundingClientRect().x})");
@@ -188,16 +188,16 @@ try {
     }
     await waitFor("Boolean(window.__introAudit.removed)", label + " intro to finish");
     const audit = await evaluate("window.__introAudit");
-    check(label + " stays fully opaque immediately before three seconds", audit.beforeExit?.time >= 2900 && audit.beforeExit.time < 3000 && audit.beforeExit.opacity === 1, audit.beforeExit);
-    check(label + " fades smoothly after three seconds without moving", audit.duringExit?.time > 3000 && audit.duringExit.opacity > 0 && audit.duringExit.opacity < 1 && audit.duringExit.transform === "none", audit.duringExit);
+    check(label + " stays fully opaque immediately before one second", audit.beforeExit?.time >= 900 && audit.beforeExit.time < 1000 && audit.beforeExit.opacity === 1, audit.beforeExit);
+    check(label + " fades smoothly after one second without moving", audit.duringExit?.time > 1000 && audit.duringExit.opacity > 0 && audit.duringExit.opacity < 1 && audit.duringExit.transform === "none", audit.duringExit);
     const elapsed = audit.removed.now - audit.ready.now + audit.ready.time;
-    check(label + " removes intro and unlocks page at fade completion", !audit.removed.connected && !audit.removed.scrollLocked && Math.abs(elapsed - (reduced ? 3160 : 3500)) < 125, { elapsed, ...audit.removed });
+    check(label + " removes intro and unlocks page at fade completion", !audit.removed.connected && !audit.removed.scrollLocked && Math.abs(elapsed - (reduced ? 1160 : 1500)) < 125, { elapsed, ...audit.removed });
     const layoutAfterIntro = await evaluate("({width:document.querySelector('.hero').getBoundingClientRect().width,x:document.querySelector('.hero').getBoundingClientRect().x})");
     check(label + " release preserves main page width and position", layoutDuringIntro.width === layoutAfterIntro.width && layoutDuringIntro.x === layoutAfterIntro.x, { during: layoutDuringIntro, after: layoutAfterIntro });
     if (imageName && !reduced) await screenshot(imageName.replace('-intro.png', '-hero-entrance.png'));
     await waitFor("Boolean(window.__introAudit.hero.finished)", label + " hero figures to settle");
     const hero = await evaluate("window.__introAudit.hero");
-    const fadeStart = audit.ready.now - audit.ready.time + 3000;
+    const fadeStart = audit.ready.now - audit.ready.time + 1000;
     check(label + " two existing hero figures begin with the logo fade", hero.first.figures === 2 && Math.abs(hero.start.now - fadeStart) < 125, { heroStart: hero.start.now, fadeStart, figures: hero.first.figures });
     if (reduced) {
       check(label + " hero uses a brief fade with no scaling", hero.first.scale === 1 && hero.middle.scale === 1 && hero.finished.scale === 1 && hero.start.duration <= 250 && hero.middle.opacity > hero.first.opacity, hero);
@@ -640,6 +640,19 @@ try {
   check("Instructional visuals have no black caption tabs", await evaluate(`
     !document.querySelector('.tester-tap-hint,.tester-action-label,.tester-figure figcaption,.tester-mockup figcaption')
   `));
+  const mockupContrast = await evaluate(`(() => {
+    const text = [...document.querySelectorAll('.testflight-current-apps p,.feedback-action p,.feedback-compose p,.mock-feedback-link,.mock-screenshot-choice span,.mock-compose-bar span')];
+    return text.map(element => {
+      const color = getComputedStyle(element).color;
+      const channels = color.slice(color.indexOf('(') + 1, -1).split(',').slice(0,3).map(Number).map(value => {
+        const channel = value / 255;
+        return channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4;
+      });
+      const luminance = channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+      return { text:element.textContent.trim(), color, ratio:1.05 / (luminance + .05) };
+    });
+  })()`);
+  check("White TestFlight visuals keep titles, feedback text and controls readable", mockupContrast.length > 10 && mockupContrast.every(item => item.ratio >= 4.5), mockupContrast);
   check("Step five illustrates opening feedback and composing a submitted report", await evaluate(`(() => {
     const stages=[...document.querySelectorAll('#step-5 .feedback-stage')], action=document.querySelector('#step-5 .feedback-action'), compose=document.querySelector('#step-5 .feedback-compose');
     return stages.length===2 && stages.every(stage=>stage.querySelector('h3') && stage.querySelector('.tester-mockup')) &&
