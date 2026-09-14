@@ -2,13 +2,16 @@
 html.tester-document{scroll-padding-top:24px}
 .tester-page .wrap{max-width:1120px}
 .tester-hero{padding-block:100px 68px;text-align:center}
-.tester-hero .eyebrow{font-size:11px;margin-bottom:24px}
-.tester-hero h1{font-size:clamp(44px,6.1vw,78px);line-height:1.12;letter-spacing:-.055em}
-.tester-lead{max-width:600px;margin:28px auto 0;font-size:17px;line-height:1.85;color:#c6bfd3}
+.tester-hero .eyebrow{font-size:11px;margin-bottom:24px;padding-inline-start:.17em}
+/* Compensate for trailing letter spacing so the visible text shares the center axis. */
+.tester-hero h1{font-size:clamp(44px,6.1vw,78px);line-height:1.12;letter-spacing:-.055em;padding-inline-end:.055em}
+.tester-lead{max-width:600px;margin:28px auto 0;font-size:17px;line-height:1.85;color:#c6bfd3;text-wrap:balance}
 .tester-invite-note{font-size:14px;color:#bbb3ca;line-height:1.8}
-.tester-hero>.tester-invite-note{margin-top:28px}
+.tester-hero>.tester-invite-note{margin-top:28px;text-wrap:balance}
 .tester-invite-note a{color:var(--core);text-decoration:underline;text-underline-offset:4px}
 .tester-invite-note a{display:inline-flex;align-items:center;min-height:44px}
+/* Inline padding preserves the touch area without enlarging the text line. */
+.tester-hero>.tester-invite-note a{display:inline;min-height:0;padding-block:14px;white-space:nowrap}
 .tester-steps{list-style:none;padding:0;margin-block:0}
 .tester-step{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.92fr);align-items:center;gap:64px;padding:60px;border:1px solid var(--hairline);border-radius:30px;background:linear-gradient(145deg,#ffffff04,#00000020);box-shadow:inset 0 1px 0 #ffffff04;margin-bottom:24px;scroll-margin-top:0}
 .tester-step:nth-child(even){grid-template-columns:minmax(0,.92fr) minmax(0,1fr)}
