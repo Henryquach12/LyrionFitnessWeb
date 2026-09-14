@@ -1,0 +1,350 @@
+<!doctype html>
+<!--
+  Chính sách bảo mật của Lyrion — trang mà `AppLinks.privacy` trong app mở ra,
+  do `LegalEndpoints` phục vụ ở `/privacy`.
+
+  MỌI câu ở đây phải đúng với code ĐANG CHẠY. Apple đối chiếu trang này với nhãn
+  "App Privacy" trong App Store Connect và với hành vi thật của app; một câu hứa
+  sai ở đây là lý do từ chối, và tệ hơn là một lời nói dối với người dùng.
+  Đổi thứ app thu thập, hoặc đổi nhà cung cấp AI, thì sửa file này TRONG CÙNG
+  commit — và nếu đổi AI thì tăng `AIConsent.currentVersion` để app hỏi lại.
+
+  Sáu chỗ thay thế do server điền — xem `LegalEndpoints.PrivacyPage`: CONTACT_VI/EN
+  từ `Legal:ContactEmail`, OPERATOR_VI/EN từ `Legal:Operator`, SERVER_COUNTRY_VI/EN
+  từ `Legal:ServerCountry`. Không ghi cứng email, tên pháp nhân hay nước đặt máy chủ
+  vào đây — chưa đặt thì trang tự nói là chưa có, và cả ba PHẢI được đặt trước khi
+  nộp App Store (Nguyên tắc Quyền riêng tư Úc 1.4).
+
+  Thanh menu trên cùng chọn ngôn ngữ: chỉ hiện MỘT bản (vi hoặc en), chọn theo
+  thứ tự ?lang= trên URL → #vi/#en → lựa chọn đã lưu → ngôn ngữ trình duyệt.
+  Hai bản vẫn nằm đủ trong HTML; JS chỉ đặt data-lang lên <html> và CSS giấu
+  bản kia. Không có JS thì hai bản xếp chồng như trước và nút menu là link nhảy
+  xuống — trang không bao giờ trắng.
+
+  ĐỪNG viết tên một chỗ thay thế kèm cặp ngoặc nhọn vào comment này. Comment HTML
+  cũng đi tới trình duyệt, nên một cặp ngoặc không khớp tên nào sẽ sống sót qua
+  bước điền và hiện ra cho người đọc. `LegalEndpointTests` chặn đúng việc đó, và
+  nó đã bắt được một lần.
+-->
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lyrion — Chính sách bảo mật / Privacy Policy</title>
+<style>
+  :root {
+    --bg: #05090b; --card: #0c1417; --line: rgba(255,255,255,.08);
+    --text: rgba(255,255,255,.90); --muted: rgba(255,255,255,.58); --accent: #7fe3c0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 20px 64px; }
+  .menu {
+    position: sticky; top: 0; z-index: 1;
+    background: rgba(5,9,11,.86); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .menu > div {
+    max-width: 720px; margin: 0 auto; padding: 10px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand { color: var(--text); font-weight: 700; font-size: 15px; letter-spacing: .01em; }
+  .lang {
+    display: flex; gap: 2px; padding: 3px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--card);
+  }
+  .lang a {
+    color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600;
+    padding: 6px 14px; border-radius: 999px;
+  }
+  .lang a[aria-current="true"] { background: var(--accent); color: var(--bg); }
+  /* JS đặt data-lang lên <html>; thiếu nó (không JS) thì cả hai bản đều hiện. */
+  html[data-lang="vi"] #en, html[data-lang="en"] #vi, html[data-lang] main > hr { display: none; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 6px; }
+  h2 { font-size: 17px; color: var(--accent); margin: 32px 0 8px; }
+  .date { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  p, li { color: var(--text); }
+  ul { padding-left: 20px; }
+  li { margin: 4px 0; }
+  .box { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 4px 18px; margin: 14px 0; }
+  a { color: var(--accent); }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 56px 0; }
+  .muted { color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="menu"><div>
+  <span class="brand">Lyrion</span>
+  <nav class="lang" aria-label="Ngôn ngữ / Language">
+    <a href="#vi" data-lang="vi" hreflang="vi">Tiếng Việt</a>
+    <a href="#en" data-lang="en" hreflang="en">English</a>
+  </nav>
+</div></header>
+<main>
+
+<section id="vi" lang="vi">
+<h1>Chính sách bảo mật của Lyrion</h1>
+<p class="date">Có hiệu lực từ ngày 14/09/2026</p>
+
+<p>Lyrion là ứng dụng lập giáo án tập gym và ghi nhật ký ăn uống. Trang này nói rõ app thu thập
+dữ liệu gì, dùng vào việc gì, gửi cho ai, và bạn xoá nó bằng cách nào.</p>
+
+<h2>1. Dữ liệu app thu thập</h2>
+<ul>
+  <li><b>Tài khoản.</b> Mã định danh do Apple hoặc Google cấp khi bạn đăng nhập, và email nếu họ gửi kèm
+    (Apple cho phép bạn ẩn email thật). Khi chưa đăng nhập, app dùng một tài khoản khách gắn với một mã ngẫu nhiên sinh trên máy.</li>
+  <li><b>Hồ sơ.</b> Tên hiển thị, tuổi, giới tính, chiều cao, cân nặng, mục tiêu, thời gian đã tập,
+    mức vận động, số buổi tập mỗi tuần, dụng cụ bạn có.</li>
+  <li><b>Tập luyện.</b> Giáo án được sinh cho bạn, các set bạn ghi (bài tập, mức tạ, số lần, thời điểm),
+    chuỗi ngày tập và danh hiệu.</li>
+  <li><b>Cân nặng và số bước.</b> Cân nặng bạn ghi theo ngày; số bước đọc từ cảm biến chuyển động của iPhone
+    (Core Motion) — app không đọc Apple Health.</li>
+  <li><b>Nhật ký ăn.</b> Tên món, bữa, ngày, khẩu phần, calo và các chất dinh dưỡng của những món bạn lưu.</li>
+  <li><b>Ảnh đại diện.</b> Chỉ khi bạn tự chọn một ảnh trong mục Chỉnh sửa hồ sơ. Ảnh được thu nhỏ ngay trên máy
+    rồi lưu trên máy chủ, và <b>hiện cho người khác thấy trên bảng xếp hạng</b> nếu bạn đã tự tham gia bảng.
+    Gỡ ảnh trong app là xoá hẳn nó khỏi máy chủ.</li>
+  <li><b>Tên trên bảng xếp hạng.</b> Chỉ khi bạn tự tham gia: bảng hiện <b>tên hiển thị trong hồ sơ</b> của bạn cho người khác thấy.
+    Đổi tên trong hồ sơ là tên trên bảng đổi theo; rời bảng là tên không còn hiện ở đó.</li>
+  <li><b>Mua hàng.</b> Thanh toán do Apple xử lý. App không nhận thông tin thẻ; máy chủ chỉ biết tài khoản có gói trả phí hay không.</li>
+</ul>
+<p>Chỉ nằm trên máy bạn, không gửi đi: ngôn ngữ đã chọn và bản sao dữ liệu để dùng khi mất mạng.</p>
+
+<h2>2. Dùng dữ liệu để làm gì</h2>
+<p>Để sinh và điều chỉnh giáo án, tính mục tiêu calo và các chất, lưu tiến độ và đồng bộ giữa các lần mở app.</p>
+<p>App <b>không</b> hiển thị quảng cáo, <b>không</b> bán dữ liệu, <b>không</b> theo dõi bạn qua app hay website của công ty khác,
+và không cài bộ công cụ phân tích hay quảng cáo của bên thứ ba.</p>
+
+<h2>3. Tính năng AI và các bên thứ ba</h2>
+<div class="box">
+<p><b>App chỉ gửi dữ liệu cho AI sau khi bạn đồng ý</b> trong một hộp hỏi hiện ra lần đầu bạn dùng tính năng.
+Rút lại bất cứ lúc nào ở <b>Cài đặt › Quyền riêng tư</b>. Không đồng ý thì bạn vẫn quét nhãn hộp và tự nhập món được.</p>
+<ul>
+  <li><b>Ảnh món ăn</b> bạn chụp hoặc chọn được gửi tới <b>Google (Gemini API)</b> để nhận ra món và ước lượng calo.</li>
+  <li><b>Câu tả bữa ăn</b> bạn gõ hoặc đọc được gửi tới <b>Inception Labs</b> để tách thành từng món và ước lượng calo.</li>
+</ul>
+<p>Máy chủ của Lyrion không lưu ảnh hay câu gốc: chúng đi qua máy chủ tới nhà cung cấp rồi bị bỏ khi có kết quả.
+Chỉ những món bạn bấm lưu mới vào nhật ký ăn. Nhà cung cấp xử lý dữ liệu theo điều khoản của họ:
+<a href="https://ai.google.dev/gemini-api/terms">Điều khoản Gemini API</a>,
+<a href="https://policies.google.com/privacy">Chính sách bảo mật của Google</a>,
+<a href="https://www.inceptionlabs.ai/privacy-policy">Chính sách bảo mật của Inception Labs</a>.</p>
+</div>
+<ul>
+  <li><b>Quét nhãn dinh dưỡng.</b> Chữ trên nhãn được đọc ngay trên máy; chỉ phần chữ (không phải ảnh) được gửi về máy chủ
+    của Lyrion để hiểu bảng số. Phần này không gửi cho AI của bên thứ ba.</li>
+  <li><b>Nhập bằng giọng nói.</b> Dùng bộ nhận dạng giọng nói của Apple; âm thanh có thể được gửi tới Apple để nhận dạng
+    (<a href="https://www.apple.com/legal/privacy/">Chính sách bảo mật của Apple</a>).</li>
+  <li><b>Đăng nhập</b> qua Apple hoặc Google. <b>Máy chủ</b> chạy trên Render, <b>cơ sở dữ liệu</b> trên Supabase (PostgreSQL).</li>
+</ul>
+<p>Lyrion chỉ chia sẻ với các bên trên phần dữ liệu họ cần để làm đúng việc được giao, và các bên này bị ràng buộc
+bởi điều khoản bảo vệ dữ liệu của chính họ ở mức không thấp hơn chính sách này.</p>
+
+<div class="box">
+<p><b>Dữ liệu của bạn được xử lý ở ngoài nước Úc.</b> Cụ thể:</p>
+<ul>
+  <li><b>Singapore</b> — cơ sở dữ liệu (Supabase). Hồ sơ, giáo án, set đã ghi, cân nặng và nhật ký ăn nằm ở đây.</li>
+  <li><b>Singapore</b> — máy chủ ứng dụng (Render).</li>
+  <li><b>Hoa Kỳ và các nước khác nơi nhà cung cấp vận hành trung tâm dữ liệu</b> — ảnh món ăn gửi tới Google
+    (Gemini API), câu tả bữa ăn gửi tới Inception Labs, và âm thanh nhận dạng giọng nói gửi tới Apple.</li>
+</ul>
+<p class="muted">Khi dữ liệu đã ra khỏi Úc, luật bảo vệ dữ liệu ở nơi nhận có thể khác luật Úc, và bạn có thể
+không dùng được cơ chế khiếu nại của Úc đối với bên nhận ở nước ngoài.</p>
+</div>
+
+<h2>4. Lưu bao lâu, xoá thế nào</h2>
+<ul>
+  <li>Dữ liệu được giữ chừng nào tài khoản còn tồn tại.</li>
+  <li><b>Xoá tài khoản ngay trong app</b>: Cài đặt › Tài khoản › Xoá tài khoản. Tài khoản và mọi dữ liệu gắn với nó
+    (hồ sơ, giáo án, set đã ghi, cân nặng, số bước, nhật ký ăn) bị xoá vĩnh viễn khỏi cơ sở dữ liệu, không hoàn tác được.</li>
+  <li>Đăng xuất thu hồi phiên đăng nhập trên máy chủ và xoá bản sao dữ liệu trên máy.</li>
+</ul>
+
+<h2>5. Bảo mật</h2>
+<p>Mọi kết nối tới máy chủ dùng HTTPS. Token đăng nhập nằm trong Keychain của iPhone; trên máy chủ, token làm mới
+chỉ được lưu dưới dạng băm.</p>
+
+<h2>6. Độ tuổi</h2>
+<p>Lyrion dành cho người từ 13 tuổi trở lên; app không nhận hồ sơ có tuổi dưới 13.</p>
+
+<h2>7. Không phải lời khuyên y tế</h2>
+<p>Calo, macro và giáo án là <b>ước lượng</b>, nhất là số do AI đoán từ ảnh hay câu tả — bạn luôn sửa được trước khi lưu.
+Hỏi ý kiến bác sĩ trước khi thay đổi lớn về ăn uống hay tập luyện, nhất là khi có bệnh nền.</p>
+
+<h2>8. Quyền của bạn</h2>
+<ul>
+  <li><b>Xem dữ liệu của bạn.</b> Hồ sơ, giáo án, set đã ghi, cân nặng và nhật ký ăn đều hiện ngay trong app.
+    Muốn một bản sao đầy đủ thì gửi yêu cầu tới địa chỉ ở mục 11.</li>
+  <li><b>Sửa dữ liệu sai.</b> Sửa thẳng trong app (Hồ sơ › Chỉnh sửa), hoặc báo cho chúng tôi.</li>
+  <li><b>Rút lại đồng ý</b> gửi dữ liệu cho AI, bất cứ lúc nào, ở Cài đặt › Quyền riêng tư.</li>
+  <li><b>Xoá tài khoản</b> và toàn bộ dữ liệu, bất cứ lúc nào — xem mục 4.</li>
+</ul>
+
+<h2>9. Khiếu nại</h2>
+<p>Nếu bạn cho rằng Lyrion xử lý dữ liệu của bạn sai, hãy gửi khiếu nại tới địa chỉ ở mục 11, mô tả việc đã xảy ra.
+Chúng tôi xác nhận đã nhận trong vòng <b>7 ngày</b> và trả lời bằng văn bản trong vòng <b>30 ngày</b>.</p>
+<p>Nếu bạn không hài lòng với câu trả lời, bạn có quyền khiếu nại lên
+<b>Văn phòng Uỷ viên Thông tin Úc</b> (Office of the Australian Information Commissioner):
+<a href="https://www.oaic.gov.au/privacy/privacy-complaints">oaic.gov.au/privacy/privacy-complaints</a>.</p>
+
+<h2>10. Thay đổi chính sách</h2>
+<p>Khi chính sách đổi, ngày hiệu lực ở đầu trang đổi theo. Nếu thay đổi liên quan tới dữ liệu gửi cho AI, app sẽ hỏi lại bạn trước khi gửi.</p>
+
+<h2>11. Đơn vị chịu trách nhiệm và liên hệ</h2>
+<p>Kien Hao Quach, Cao Manh Linh, South Australia, Australia</p>
+<p>Câu hỏi hoặc khiếu nại về dữ liệu của bạn, gửi tới <a href="mailto:support@lyrionfitness.com">support@lyrionfitness.com</a>.</p>
+</section>
+
+<hr>
+
+<section id="en" lang="en">
+<h1>Lyrion Privacy Policy</h1>
+<p class="date">Effective 14 September 2026</p>
+
+<p>Lyrion builds gym training plans and keeps a food diary. This page explains what data the app collects,
+what it is used for, who receives it, and how you delete it.</p>
+
+<h2>1. Data the app collects</h2>
+<ul>
+  <li><b>Account.</b> The identifier Apple or Google issues when you sign in, and your email if they include it
+    (Apple lets you hide your real address). Before you sign in, the app uses a guest account tied to a random identifier generated on your device.</li>
+  <li><b>Profile.</b> Display name, age, sex, height, weight, goal, training experience, activity level,
+    training days per week, and the equipment you have.</li>
+  <li><b>Training.</b> The plan generated for you, the sets you log (exercise, weight, reps, time), streaks and badges.</li>
+  <li><b>Weight and steps.</b> Weights you log by date; step counts read from the iPhone motion sensor
+    (Core Motion) — the app does not read Apple Health.</li>
+  <li><b>Food diary.</b> Name, meal, date, portion, calories and nutrients of the foods you save.</li>
+  <li><b>Profile picture.</b> Only if you choose one in Edit profile. The image is downscaled on your device, stored on the server,
+    and <b>shown to other people on the leaderboard</b> if you joined it yourself. Removing it in the app deletes it from the server.</li>
+  <li><b>Leaderboard name.</b> Only if you join: the board shows <b>the display name from your profile</b> to other people.
+    Changing your profile name changes it on the board; leaving the board removes it from there.</li>
+  <li><b>Purchases.</b> Payments are handled by Apple. The app never receives card details; the server only knows whether an account has a paid plan.</li>
+</ul>
+<p>Kept only on your device, never sent: your chosen language and the offline copy of your data.</p>
+
+<h2>2. How the data is used</h2>
+<p>To generate and adjust your plan, calculate calorie and macro targets, save your progress and sync it across sessions.</p>
+<p>The app shows <b>no</b> ads, does <b>not</b> sell data, does <b>not</b> track you across other companies' apps or websites,
+and contains no third-party analytics or advertising SDKs.</p>
+
+<h2>3. AI features and third parties</h2>
+<div class="box">
+<p><b>The app only sends data to AI after you agree</b> in a prompt shown the first time you use the feature.
+Withdraw at any time in <b>Settings › Privacy</b>. If you decline, you can still scan nutrition labels and enter foods manually.</p>
+<ul>
+  <li><b>Food photos</b> you take or pick are sent to <b>Google (Gemini API)</b> to recognise dishes and estimate calories.</li>
+  <li><b>Meal descriptions</b> you type or speak are sent to <b>Inception Labs</b> to split them into foods and estimate calories.</li>
+</ul>
+<p>Lyrion's server does not store the photo or the original text: it passes through to the provider and is discarded once the result returns.
+Only foods you choose to save go into your diary. Providers process data under their own terms:
+<a href="https://ai.google.dev/gemini-api/terms">Gemini API Terms</a>,
+<a href="https://policies.google.com/privacy">Google Privacy Policy</a>,
+<a href="https://www.inceptionlabs.ai/privacy-policy">Inception Labs Privacy Policy</a>.</p>
+</div>
+<ul>
+  <li><b>Nutrition label scanning.</b> Label text is read on your device; only the text (not the photo) is sent to
+    Lyrion's server to interpret the table. It is not sent to any third-party AI.</li>
+  <li><b>Voice input.</b> Uses Apple's speech recognition; audio may be sent to Apple for recognition
+    (<a href="https://www.apple.com/legal/privacy/">Apple Privacy Policy</a>).</li>
+  <li><b>Sign-in</b> via Apple or Google. The <b>server</b> runs on Render and the <b>database</b> on Supabase (PostgreSQL).</li>
+</ul>
+<p>Lyrion shares with these parties only the data they need for the task they perform, and they are bound by their own
+data protection terms offering protection no lower than this policy.</p>
+
+<div class="box">
+<p><b>Your data is processed outside Australia.</b> Specifically:</p>
+<ul>
+  <li><b>Singapore</b> — the database (Supabase). Your profile, plans, logged sets, weights and food diary live here.</li>
+  <li><b>Singapore</b> — the application server (Render).</li>
+  <li><b>The United States and other countries where the providers operate data centres</b> — food photos sent to
+    Google (Gemini API), meal descriptions sent to Inception Labs, and speech audio sent to Apple for recognition.</li>
+</ul>
+<p class="muted">Once data leaves Australia, the data protection laws where it is received may differ from Australian
+law, and you may not be able to use Australian complaint mechanisms against an overseas recipient.</p>
+</div>
+
+<h2>4. Retention and deletion</h2>
+<ul>
+  <li>Data is kept for as long as your account exists.</li>
+  <li><b>Delete your account in the app</b>: Settings › Account › Delete account. The account and all data linked to it
+    (profile, plans, logged sets, weights, steps, food diary) are permanently deleted from the database. This cannot be undone.</li>
+  <li>Signing out revokes your session on the server and clears the copy of your data on the device.</li>
+</ul>
+
+<h2>5. Security</h2>
+<p>All connections to the server use HTTPS. Sign-in tokens are stored in the iPhone Keychain; on the server,
+refresh tokens are stored only as hashes.</p>
+
+<h2>6. Age</h2>
+<p>Lyrion is intended for people aged 13 and over; the app does not accept profiles under 13.</p>
+
+<h2>7. Not medical advice</h2>
+<p>Calories, macros and training plans are <b>estimates</b>, especially numbers guessed by AI from a photo or description — you can always edit them before saving.
+Consult a doctor before major changes to your diet or training, especially if you have a medical condition.</p>
+
+<h2>8. Your rights</h2>
+<ul>
+  <li><b>Access your data.</b> Your profile, plans, logged sets, weights and food diary are all visible in the app.
+    For a full copy, write to the address in section 11.</li>
+  <li><b>Correct anything wrong.</b> Edit it directly in the app (Profile › Edit), or tell us.</li>
+  <li><b>Withdraw consent</b> to AI processing at any time, in Settings › Privacy.</li>
+  <li><b>Delete your account</b> and all its data at any time — see section 4.</li>
+</ul>
+
+<h2>9. Complaints</h2>
+<p>If you believe Lyrion has mishandled your data, send a complaint to the address in section 11 describing what
+happened. We acknowledge receipt within <b>7 days</b> and respond in writing within <b>30 days</b>.</p>
+<p>If you are not satisfied with our response, you may complain to the
+<b>Office of the Australian Information Commissioner</b>:
+<a href="https://www.oaic.gov.au/privacy/privacy-complaints">oaic.gov.au/privacy/privacy-complaints</a>.</p>
+
+<h2>10. Changes</h2>
+<p>When this policy changes, the effective date above changes with it. If a change affects data sent to AI, the app will ask you again before sending.</p>
+
+<h2>11. Who operates Lyrion, and how to reach us</h2>
+<p>Kien Hao Quach, Cao Manh Linh, South Australia, Australia</p>
+<p>Questions or complaints about your data: <a href="mailto:support@lyrionfitness.com">support@lyrionfitness.com</a>.</p>
+</section>
+</main>
+<script>
+(function () {
+  var KEY = 'lyrion-privacy-lang';
+  var TITLES = { vi: 'Lyrion — Chính sách bảo mật', en: 'Lyrion — Privacy Policy' };
+  function valid(x) { return x === 'vi' || x === 'en' ? x : null; }
+  function pick() {
+    var fromQuery = valid(new URLSearchParams(location.search).get('lang'));
+    if (fromQuery) return fromQuery;
+    var fromHash = valid(location.hash.replace('#', ''));
+    if (fromHash) return fromHash;
+    var saved = null;
+    try { saved = valid(localStorage.getItem(KEY)); } catch (e) { saved = null; }
+    if (saved) return saved;
+    return /^vi\b/i.test(navigator.language || '') ? 'vi' : 'en';
+  }
+  function apply(lang) {
+    var root = document.documentElement;
+    root.setAttribute('data-lang', lang);
+    root.lang = lang;
+    document.title = TITLES[lang];
+    var links = document.querySelectorAll('.lang a');
+    for (var i = 0; i < links.length; i++) {
+      links[i].setAttribute('aria-current', links[i].getAttribute('data-lang') === lang ? 'true' : 'false');
+    }
+  }
+  apply(pick());
+  document.querySelector('.lang').addEventListener('click', function (ev) {
+    var a = ev.target.closest('a[data-lang]');
+    if (!a) return;
+    ev.preventDefault();
+    var lang = a.getAttribute('data-lang');
+    apply(lang);
+    try { localStorage.setItem(KEY, lang); } catch (e) { /* chế độ riêng tư: không nhớ, vẫn đổi */ }
+    history.replaceState(null, '', '?lang=' + lang);
+    window.scrollTo(0, 0);
+  });
+})();
+</script>
+</body>
+</html>
