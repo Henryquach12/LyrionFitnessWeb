@@ -82,6 +82,7 @@ Thêm ảnh vào `assets/`; hỗ trợ PNG, JPG, WebP và AVIF. Khi ảnh trốn
 
 - `index.html`: nội dung tiếng Việt và cấu trúc trang.
 - `styles.css`: bảng màu Apex, layout desktop/mobile, chuyển động, màn hình minh họa.
+- `glass.css`: chất liệu kính dùng chung cho nền thẻ, bảng, điều hướng và điều khiển trên cả hai trang.
 - `previews.js`: bốn giao diện minh họa và dữ liệu mẫu.
 - `script.js`: menu mobile, tab giải thích thuật toán, phóng to ảnh và bàn phím.
 - `motion.js`: tỷ lệ ảnh hero theo vị trí cuộn.
@@ -137,9 +138,9 @@ Khi lớp logo bắt đầu mờ, cặp iPhone có sẵn tăng từ 72% lên kí
 
 Nền giữ gradient và bảng màu hiện tại. Các đường nền SVG, vệt chuột và lớp sáng trang trí đã được gỡ.
 
-Phần nhận xét dùng nền của trang, tiêu đề trắng và từng thẻ trắng với chữ tối, đánh giá 4–5 sao. Chữ nhận xét là 20 px trên desktop và 18 px ở màn hình nhỏ. Chuyển nhận xét dùng opacity/transform trong 200 ms; thao tác bàn phím đổi tức thì. FAQ dùng nền đen cho câu hỏi, xám cho câu trả lời và cỡ chữ 15–16 px.
+Phần nhận xét dùng nền của trang, tiêu đề trắng và từng thẻ kính trắng mờ với chữ tối, đánh giá 4–5 sao. Chữ nhận xét là 20 px trên desktop và 18 px ở màn hình nhỏ. Chuyển nhận xét dùng opacity/transform trong 200 ms; thao tác bàn phím đổi tức thì. FAQ dùng kính tối cho câu hỏi, kính xám sáng hơn cho câu trả lời và cỡ chữ 15–16 px.
 
-Menu thêm “Trở thành tester” sau “Hỏi đáp” trên desktop và ở cuối danh sách mobile. Kích thước nút Menu và khoảng cách các mục mobile được giữ nguyên. Kính mờ dùng ở các lớp điều hướng, bảng thuật toán và cửa sổ xem ảnh; chế độ giảm độ trong suốt dùng nền đặc.
+Menu thêm “Trở thành tester” sau “Hỏi đáp” trên desktop và ở cuối danh sách mobile. Kích thước nút Menu và khoảng cách các mục mobile được giữ nguyên. Chất liệu kính dùng chung nền trong suốt, viền sáng nhẹ và bóng đổ trên thẻ, bảng, nút, form, điều hướng và trang TestFlight. Kính tối giữ nền tím của trang; kính sáng giữ chữ tối trên thẻ nhận xét và màn hình TestFlight. Chế độ giảm độ trong suốt hoặc tăng tương phản chuyển sang nền đặc và bỏ blur. Kiểm tra trình duyệt đối chiếu độ tương phản của chữ, placeholder và trạng thái gửi form trên các lớp nền kính, bên cạnh ảnh desktop/mobile.
 
 Vùng trên cùng trên mobile, màu nền gốc và `theme-color` dùng chung `#251d38`; lớp nền hòa dần vào gradient hiện tại bên dưới menu. Trang dùng `viewport-fit=cover` và các giá trị `safe-area-inset-*` để phủ vùng notch nhưng vẫn đặt nội dung bên dưới mép an toàn, theo [hướng dẫn WebKit](https://webkit.org/blog/7929/designing-websites-for-iphone-x/). Kiểm tra trình duyệt mô phỏng được kích thước mobile và safe-area; giao diện thanh trạng thái của Safari cần đối chiếu trên iPhone thật.
 

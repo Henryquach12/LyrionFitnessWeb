@@ -47,6 +47,56 @@ function check(name, condition, detail = null) {
   results.push({ name, passed: Boolean(condition), detail });
   console.log((condition ? "PASS " : "FAIL ") + name + (detail ? " " + JSON.stringify(detail) : ""));
 }
+// Check text against the composited endpoints of CSS background layers. Rendered
+// screenshots still cover the blur itself and image content behind a surface.
+function inspectTextContrast(selector, pseudo = null) {
+  const parse = value => {
+    const channels = value.match(/[\d.]+/g)?.map(Number) || [0, 0, 0, 0];
+    return [...channels.slice(0, 3), channels[3] ?? 1];
+  };
+  const blend = (top, bottom) => top.slice(0, 3).map((channel, index) => channel * top[3] + bottom[index] * (1 - top[3]));
+  const luminance = rgb => rgb.map(value => {
+    const channel = value / 255;
+    return channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4;
+  }).reduce((sum, channel, index) => sum + channel * [.2126, .7152, .0722][index], 0);
+  const extremes = colors => {
+    const sorted = colors.sort((a, b) => luminance(a) - luminance(b));
+    return [sorted[0], sorted.at(-1)];
+  };
+  const splitLayers = value => {
+    const layers = [];
+    let depth = 0, start = 0;
+    for (let index = 0; index < value.length; index++) {
+      if (value[index] === '(') depth++;
+      if (value[index] === ')') depth--;
+      if (value[index] === ',' && depth === 0) { layers.push(value.slice(start, index)); start = index + 1; }
+    }
+    layers.push(value.slice(start));
+    return layers;
+  };
+  return [...document.querySelectorAll(selector)].map(element => {
+    const chain = [];
+    for (let ancestor = element; ancestor; ancestor = ancestor.parentElement) chain.unshift(ancestor);
+    let backgrounds = [[37, 29, 56]];
+    for (const ancestor of chain) {
+      const css = getComputedStyle(ancestor), base = parse(css.backgroundColor);
+      backgrounds = backgrounds.map(background => blend(base, background));
+      for (const layer of splitLayers(css.backgroundImage).reverse()) {
+        const stops = [...layer.matchAll(/rgba?\([^)]+\)/g)].map(match => parse(match[0]));
+        if (stops.length) backgrounds = extremes(backgrounds.flatMap(background => stops.map(stop => blend(stop, background))));
+      }
+    }
+    const css = getComputedStyle(element, pseudo), foreground = parse(css.color);
+    foreground[3] *= Number(css.opacity);
+    const ratios = backgrounds.map(background => {
+      const a = luminance(blend(foreground, background)), b = luminance(background);
+      return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+    });
+    return { text: pseudo || element.textContent.trim().slice(0, 65) || element.getAttribute('name'), color: css.color, ratio: Math.min(...ratios) };
+  });
+}
+const contrastExpression = (selector, pseudo = null) => `(${inspectTextContrast.toString()})(${JSON.stringify(selector)},${JSON.stringify(pseudo)})`;
+const alpha = color => color.startsWith('rgba(') ? Number(color.slice(color.lastIndexOf(',') + 1, -1)) : 1;
 try {
   const targets = await waitJson("http://127.0.0.1:" + debugPort + "/json/list");
   const target = targets.find(item => item.type === "page");
@@ -97,6 +147,24 @@ try {
       await delay(40);
     } while (Date.now() < deadline);
     throw new Error("Timed out waiting for " + description);
+  };
+  const checkGlassPreferences = async (page, surfaces, copy) => {
+    const inspectSurfaces = `(() => [...document.querySelectorAll(${JSON.stringify(surfaces)})].map(element => {
+      const css=getComputedStyle(element), box=element.getBoundingClientRect();
+      return {surface:element.className,background:css.backgroundColor,blur:css.backdropFilter,border:css.borderTopColor,width:box.width,height:box.height};
+    }))()`;
+    const original = await evaluate(inspectSurfaces);
+    for (const [name,value,label] of [['prefers-reduced-transparency','reduce','reduced transparency'],['prefers-contrast','more','increased contrast']]) {
+      await send("Emulation.setEmulatedMedia", { features:[{name,value}] });
+      await delay(250);
+      const material = await evaluate(inspectSurfaces);
+      check(page + " uses solid surfaces without blur for " + label,
+        material.length > 5 && material.every((item,index) => alpha(item.background) === 1 && item.blur === 'none' && alpha(item.border) > 0 && Math.abs(item.width-original[index].width)<1 && Math.abs(item.height-original[index].height)<1), material);
+      const text = await evaluate(contrastExpression(copy));
+      check(page + " glass content remains readable with " + label, text.length > 5 && text.every(item => item.ratio >= 4.5), text);
+    }
+    await send("Emulation.setEmulatedMedia", { features:[] });
+    await delay(100);
   };
   await send("Page.enable");
   await send("Runtime.enable");
@@ -231,11 +299,14 @@ try {
     [...document.querySelectorAll('#reviews-title, #reviews-title span, .reviews-heading .eyebrow')].every(element => getComputedStyle(element).color === 'rgb(255, 255, 255)') &&
     document.querySelector('#reviews-title').innerText.replace(/\\s+/g, ' ').trim() === 'Người dùng Lyrion Đánh giá thế nào?'
   `));
-  check("Review cards retain white surfaces and dark readable copy", await evaluate(`
+  check("Review cards retain frosted light surfaces and dark copy", await evaluate(`
     [...document.querySelectorAll('.review-card')].every(card =>
-      getComputedStyle(card).backgroundColor === 'rgb(255, 255, 255)' &&
-      getComputedStyle(card.querySelector('blockquote > p')).color === 'rgb(23, 21, 27)')
+      getComputedStyle(card).backgroundColor.startsWith('rgba(') &&
+      getComputedStyle(card).backdropFilter.includes('blur(') &&
+      getComputedStyle(card.querySelector('blockquote > p')).color.match(/[\\d.]+/g).slice(0, 3).every(channel => Number(channel) < 60))
   `));
+  const reviewContrast = await evaluate(contrastExpression('.review-card blockquote > p,.review-card footer strong,.review-card footer > span > span'));
+  check("Frosted review cards keep review and author text readable", reviewContrast.length > 0 && reviewContrast.every(item => item.ratio >= 4.5), reviewContrast);
   check("Every review has an accessible four- or five-star rating", await evaluate(`
     [...document.querySelectorAll('.review-card')].every(card => {
       const rating = card.querySelector('.review-rating');
@@ -311,16 +382,16 @@ try {
     check("Mobile navigation preserves original closed geometry at " + width,
       closed.closed && closeTo(closed.header, [headerX, 12, headerWidth, 54]) && closeTo(closed.toggle, [buttonX, 18, 64.09375, 42]), closed);
     check("Mobile navigation preserves original sizing and glass styling at " + width,
-      closed.padding === '5px 13px 5px 9px' && closed.gap === '30px' && closed.fontSize === '12px' && closed.blur === 'blur(20px)' && closed.background === 'rgba(10, 8, 15, 0.86)', closed);
+      closed.padding === '5px 13px 5px 9px' && closed.gap === '30px' && closed.fontSize === '12px' && closed.blur.includes('blur(12px)') && closed.blur.includes('saturate(') && alpha(closed.background) > 0 && alpha(closed.background) < 1, closed);
     await evaluate("document.querySelector('.menu-toggle').click()");
     const opened = await evaluate(`(() => {
       const menu = document.querySelector('.site-nav'), r = menu.getBoundingClientRect(), css = getComputedStyle(menu);
       const links = [...menu.querySelectorAll('a')].filter(link => link.getClientRects().length);
-      return { box: [r.x, r.y, r.width, r.height], padding: css.padding, background: css.backgroundColor,
+      return { box: [r.x, r.y, r.width, r.height], padding: css.padding, background: css.backgroundColor, blur: css.backdropFilter,
         links: links.map(link => ({ href: link.getAttribute('href'), font: getComputedStyle(link).fontSize, padding: getComputedStyle(link).padding })) };
     })()`);
     check("Mobile dropdown preserves its placement and adds the tester guide at " + width,
-      closeTo(opened.box.slice(0, 3), [menuX, 74, menuWidth]) && opened.box[3] > 195 && opened.box[3] < 270 && opened.padding === '15px' && opened.background === 'rgb(26, 22, 36)' &&
+      closeTo(opened.box.slice(0, 3), [menuX, 74, menuWidth]) && opened.box[3] > 195 && opened.box[3] < 270 && opened.padding === '15px' && alpha(opened.background) > 0 && alpha(opened.background) < 1 && opened.blur.includes('blur(') &&
       JSON.stringify(opened.links.map(link => link.href)) === JSON.stringify(['#features', '#intelligence', '#reviews', 'tester.html']) &&
       opened.links.every(link => link.font === '16px' && link.padding === '14px'), opened);
     await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
@@ -493,14 +564,24 @@ try {
   await delay(250);
   check("Early signup works by keyboard and scrolls to the existing form", await evaluate("location.hash === '#waitlist' && getComputedStyle(document.documentElement).scrollBehavior === 'smooth' && document.querySelector('#waitlist-form').getBoundingClientRect().top < innerHeight && document.querySelector('#waitlist-form').getBoundingClientRect().bottom > 0"));
 
+  const checkFormReadability = async state => {
+    const copy = await evaluate(contrastExpression('.waitlist-board h3,.form-field label,.form-field input,.waitlist-submit,.form-note,#waitlist-status:not(:empty)'));
+    const placeholders = await evaluate(contrastExpression('.form-field input', '::placeholder'));
+    const samples = [...copy, ...placeholders];
+    check("Frosted signup form remains readable " + state, samples.length > 5 && samples.every(item => item.ratio >= 4.5), samples);
+  };
+  await checkFormReadability("before submission");
   await evaluate("window.__realFetch=window.fetch;window.__formCalls=0;window.fetch=()=>{window.__formCalls++;return new Promise(r=>window.__resolveForm=r)};document.querySelector('#waitlist-name').value='Nguyễn An';document.querySelector('#waitlist-email').value='an@example.com';document.querySelector('#waitlist-form').requestSubmit();document.querySelector('#waitlist-form').requestSubmit()");
   check("Waitlist prevents duplicate submissions while pending", await evaluate("window.__formCalls === 1 && document.querySelector('.waitlist-fields').disabled && document.querySelector('#waitlist-form').getAttribute('aria-busy') === 'true'"));
+  await checkFormReadability("while submitting");
   await evaluate("window.__resolveForm(new Response(JSON.stringify({ok:true}),{status:200,headers:{'Content-Type':'application/json'}}))");
   await delay(60);
   check("Waitlist success clears form and announces result", await evaluate("document.querySelector('#waitlist-status').dataset.state === 'success' && document.querySelector('#waitlist-name').value === '' && !document.querySelector('.waitlist-fields').disabled"));
+  await checkFormReadability("after success");
   await evaluate("window.fetch=async()=>new Response(JSON.stringify({ok:false}),{status:503});document.querySelector('#waitlist-name').value='Nguyễn An';document.querySelector('#waitlist-email').value='an@example.com';document.querySelector('#waitlist-form').requestSubmit()");
   await delay(60);
   check("Unconfigured waitlist shows honest error and retains input", await evaluate("document.querySelector('#waitlist-status').dataset.state === 'error' && document.querySelector('#waitlist-status').textContent.includes('chưa mở') && document.querySelector('#waitlist-email').value === 'an@example.com'"));
+  await checkFormReadability("after an error");
   await evaluate("window.fetch=async()=>{throw new TypeError('Offline')};document.querySelector('#waitlist-form').requestSubmit()");
   await delay(60);
   check("Waitlist can retry after a network error", await evaluate("!document.querySelector('.waitlist-fields').disabled && document.querySelector('#waitlist-status').textContent.includes('gián đoạn')"));
@@ -529,10 +610,14 @@ try {
     await delay(150);
     const faq = await evaluate(`(() => {
       const details = document.querySelector('.faq-items details'), summary = getComputedStyle(details.querySelector('summary')), answer = getComputedStyle(details.querySelector('p'));
-      return { questionBackground: summary.backgroundColor === 'rgba(0, 0, 0, 0)' ? getComputedStyle(details).backgroundColor : summary.backgroundColor,
-        answerBackground: answer.backgroundColor, questionSize: parseFloat(summary.fontSize), answerSize: parseFloat(answer.fontSize), open: details.open };
+      const brightness = color => color.match(/[\\d.]+/g).slice(0, 3).reduce((total, channel) => total + Number(channel), 0) / 3;
+      const question = summary.backgroundColor === 'rgba(0, 0, 0, 0)' ? getComputedStyle(details).backgroundColor : summary.backgroundColor;
+      return { questionBackground: question, answerBackground: answer.backgroundColor, darkerQuestion: brightness(question) < brightness(answer.backgroundColor),
+        questionSize: parseFloat(summary.fontSize), answerSize: parseFloat(answer.fontSize), open: details.open };
     })()`);
-    check(prefix + " FAQ separates black questions and gray expanded answers", faq.open && faq.questionBackground === 'rgb(8, 8, 12)' && faq.answerBackground === 'rgb(43, 43, 48)', faq);
+    check(prefix + " FAQ keeps dark questions distinct from frosted gray answers", faq.open && faq.darkerQuestion && alpha(faq.questionBackground) > 0 && alpha(faq.questionBackground) < 1 && alpha(faq.answerBackground) > 0 && alpha(faq.answerBackground) < 1, faq);
+    const faqContrast = await evaluate(contrastExpression('.faq-items details[open] summary,.faq-items details[open] > p'));
+    check(prefix + " FAQ text remains readable on both glass layers", faqContrast.length >= 2 && faqContrast.every(item => item.ratio >= 4.5), faqContrast);
     check(prefix + " FAQ uses larger readable question and answer type", faq.questionSize >= (width < 768 ? 15 : 16) && faq.answerSize >= (width < 768 ? 15 : 16), faq);
     await screenshot(prefix + "-faq.png");
     await evaluate("document.querySelector('.faq-items details').open=false");
@@ -553,6 +638,9 @@ try {
     }
   }
   check("All local images loaded", await evaluate("[...document.images].every(img=>img.complete && img.naturalWidth>0)"));
+  await checkGlassPreferences("Landing page",
+    '.site-header,.site-nav,.algorithm-stage,.intelligence-tabs,.preview-card,.review-card,.waitlist-board,.form-field input,.faq-items details,.faq-items details > p,.preview-dialog,.reviews-next',
+    '.preview-copy p,.review-card blockquote > p,.review-card footer strong,.review-card footer > span > span,.waitlist-board h3,.form-field label,.form-field input,.form-note,.faq-items summary,.faq-items details > p');
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await delay(100);
   check("Reduced motion preference respected", await evaluate("getComputedStyle(document.documentElement).scrollBehavior === 'auto' && [...document.querySelectorAll('.will-reveal')].every(el=>getComputedStyle(el).opacity === '1')"));
@@ -634,24 +722,13 @@ try {
   check("Current-testing cards show only LyrionFitness with no version text", await evaluate(`(() => {
     const cards=[...document.querySelectorAll('.testflight-current-apps')];
     return cards.length>0 && cards.every(card=>card.querySelectorAll('.testflight-app-row').length===1 && /LyrionFitness/.test(card.textContent) &&
-      !/version|phiên bản|\\d+\\.\\d+/i.test(card.textContent) && getComputedStyle(card).backgroundColor==='rgb(255, 255, 255)');
+      !/version|phiên bản|\\d+\\.\\d+/i.test(card.textContent) && getComputedStyle(card).backgroundColor.startsWith('rgba('));
   })()`));
   check("Instructional visuals have no black caption tabs", await evaluate(`
     !document.querySelector('.tester-tap-hint,.tester-action-label,.tester-figure figcaption,.tester-mockup figcaption')
   `));
-  const mockupContrast = await evaluate(`(() => {
-    const text = [...document.querySelectorAll('.testflight-current-apps p,.feedback-action p,.feedback-compose p,.mock-feedback-link,.mock-screenshot-choice span,.mock-compose-bar span')];
-    return text.map(element => {
-      const color = getComputedStyle(element).color;
-      const channels = color.slice(color.indexOf('(') + 1, -1).split(',').slice(0,3).map(Number).map(value => {
-        const channel = value / 255;
-        return channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4;
-      });
-      const luminance = channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
-      return { text:element.textContent.trim(), color, ratio:1.05 / (luminance + .05) };
-    });
-  })()`);
-  check("White TestFlight visuals keep titles, feedback text and controls readable", mockupContrast.length > 10 && mockupContrast.every(item => item.ratio >= 4.5), mockupContrast);
+  const mockupContrast = await evaluate(contrastExpression('.testflight-current-apps p,.feedback-action p,.feedback-compose p,.mock-feedback-link,.mock-screenshot-choice span,.mock-compose-bar span'));
+  check("Frosted white TestFlight visuals keep titles, feedback text and controls readable", mockupContrast.length > 10 && mockupContrast.every(item => item.ratio >= 4.5), mockupContrast);
   check("Step five illustrates opening feedback and composing a submitted report", await evaluate(`(() => {
     const stages=[...document.querySelectorAll('#step-5 .feedback-stage')], action=document.querySelector('#step-5 .feedback-action'), compose=document.querySelector('#step-5 .feedback-compose');
     return stages.length===2 && stages.every(stage=>stage.querySelector('h3') && stage.querySelector('.tester-mockup')) &&
@@ -678,6 +755,9 @@ try {
     [...document.querySelectorAll('a[target="_blank"]')].every(link => link.relList.contains('noopener')) &&
     document.querySelector('.tester-support').textContent.trim() === 'Mọi thông tin liên hệ: support@lyrionfitness.com'
   `));
+  await checkGlassPreferences("Tester guide",
+    '.tester-step,.tester-help-list section,.testflight-invitation,.testflight-current-apps,.feedback-stage .tester-mockup',
+    '.tester-step-copy > p,.invitation-options p,.feedback-stage > p,.tester-help-list p,.testflight-current-apps p,.feedback-action p,.feedback-compose p,.mock-feedback-link,.mock-screenshot-choice span,.mock-compose-bar span');
   for (const [width,height,prefix] of [[1440,900,'desktop'],[768,900,'tablet'],[390,844,'mobile'],[320,844,'small-mobile']]) {
     await send("Emulation.setDeviceMetricsOverride", { width,height,deviceScaleFactor:1,mobile:width<768 });
     await send("Emulation.setTouchEmulationEnabled", { enabled:width<768 });
