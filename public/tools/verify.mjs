@@ -642,7 +642,7 @@ try {
   }
   check("All local images loaded", await evaluate("[...document.images].every(img=>img.complete && img.naturalWidth>0)"));
   await checkGlassPreferences("Landing page",
-    '.site-header,.site-nav,.algorithm-stage,.intelligence-tabs,.preview-card,.review-card,.waitlist-board,.form-field input,.faq-items details,.faq-items details > p,.preview-dialog,.reviews-next',
+    '.site-header,.site-nav,.algorithm-stage,.intelligence-tabs,.review-card,.waitlist-board,.form-field input,.faq-items details,.faq-items details > p,.preview-dialog,.reviews-next',
     '.preview-copy p,.review-card blockquote > p,.review-card footer strong,.review-card footer > span > span,.waitlist-board h3,.form-field label,.form-field input,.form-note,.faq-items summary,.faq-items details > p');
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await delay(100);

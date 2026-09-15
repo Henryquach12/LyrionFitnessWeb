@@ -47,7 +47,6 @@
 .site-header,
 .algorithm-stage,
 .intelligence-tabs,
-.preview-card,
 .review-card,
 .waitlist-board,
 .faq-items details,
@@ -87,19 +86,6 @@
 .button.primary:hover{
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.6),inset 0 1px 0 rgba(255,255,255,.5),0 10px 28px rgba(113,79,172,.25);
 }
-
-.preview-card{
-  padding-top:24px;
-  border-radius:var(--radius-lg);
-  background-color:var(--surface-glass-soft);
-  /* Inset edges preserve the phone and text geometry at every breakpoint. */
-  box-shadow:inset 0 0 0 1px var(--glass-border),inset 0 1px 0 rgba(255,255,255,.1),0 16px 40px rgba(5,3,12,.12);
-}
-
-.preview-card:nth-child(even){padding-top:68px}
-.preview-copy{padding-inline:22px;padding-bottom:25px}
-.preview-copy>p{color:var(--glass-muted)}
-.preview-open{color:var(--glass-muted)}
 
 .algorithm-stage{border-top-color:var(--glass-border-bright)}
 .algorithm-panel{
@@ -199,13 +185,8 @@
   }
 }
 
-@media(max-width:1023px){
-  .preview-card:nth-child(even){padding-top:54px}
-}
-
 @media(max-width:767px){
   :root{--glass-blur:var(--glass-blur-mobile)}
-  .preview-card:nth-child(even){padding-top:24px}
   .site-nav{
     background:var(--surface-glass-deep);
     background-image:var(--glass-sheen);
