@@ -17,7 +17,9 @@ export function createSiteServer(options = {}) {
       if (request.method !== "GET" && request.method !== "HEAD") {
         response.writeHead(405, { Allow: "GET, HEAD" }).end(); return;
       }
-      const relative = pathname === "/" ? "index.html" : pathname.slice(1);
+      const relative = pathname === "/" ? "index.html"
+        : pathname === "/policy" || pathname === "/policy/" ? "policy.html"
+        : pathname.slice(1);
       const filename = path.resolve(root, relative);
       const isPublicAsset = relative.startsWith("assets/") && assetTypes.has(path.extname(relative).toLowerCase()) && !relative.split(/[\\/]/).some(part => part.startsWith("."));
       if (!filename.startsWith(root + path.sep) || (!publicFiles.has(relative) && !isPublicAsset)) {

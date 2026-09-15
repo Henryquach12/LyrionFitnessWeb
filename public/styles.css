@@ -1095,6 +1095,34 @@ details[open] .faq-plus:after{
   text-underline-offset:4px;
 }
 
+.footer-contact{
+  grid-column:1/-1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  font-size:12px;
+  line-height:1.8;
+  text-align:center;
+  color:var(--glass-muted,var(--secondary));
+}
+
+.footer-contact p{
+  font-size:inherit;
+  line-height:inherit;
+  color:inherit;
+}
+
+.footer-policy{
+  display:inline-flex;
+  align-items:center;
+  min-height:44px;
+  padding:8px;
+  color:var(--text-bright);
+  text-decoration:underline;
+  text-underline-offset:4px;
+}
+
 .modal-open{
   overflow:hidden;
 }
@@ -1697,6 +1725,23 @@ details[open] .faq-plus:after{
   margin-top:18px;
   text-align:center;
   text-wrap:balance;
+}
+
+.form-consent{
+  font-size:12px;
+  line-height:1.8;
+}
+
+.form-consent a{
+  color:inherit;
+  font-weight:500;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+
+.form-consent a:focus-visible{
+  outline-color:#7960ba;
+  outline-offset:3px;
 }
 
 .form-status{

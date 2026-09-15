@@ -13,6 +13,8 @@ npm start
 
 Mở http://127.0.0.1:4173. Chưa cần Supabase để xem giao diện. Mở trực tiếp `index.html` cũng xem được trang, nhưng đăng ký waitlist cần chạy qua máy chủ.
 
+Trang chính sách bảo mật được phục vụ tại `/policy` từ `public/policy.html`, cùng bản với `../policy/index.html`. Link nằm dưới thông tin liên hệ trên trang chính và trang tester, đồng thời có trong thông báo đồng ý nhận email tại form đăng ký. Link mở tab mới để người đọc xem chính sách mà vẫn giữ thông tin đang nhập.
+
 ## Kết nối waitlist với Supabase
 
 1. Kiểm tra cấu trúc hiện có bằng `../supabase/inspect-waitlist.sql` trong **SQL Editor**. Nếu chưa có bảng đăng ký phù hợp, chạy `../supabase/waitlist.sql`. File tạo `public.waitlist_signups` với email duy nhất, bật Row Level Security và chặn quyền đọc/ghi công khai. Nếu đã có bảng phù hợp khác, điều chỉnh endpoint theo bảng đó trước khi tạo mới.

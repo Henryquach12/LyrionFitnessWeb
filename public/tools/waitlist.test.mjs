@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { createSiteServer, loadSiteEnvironment } from "../server.mjs";
 import { createWorker } from "../worker.mjs";
 import { fileURLToPath } from "node:url";
@@ -123,6 +124,25 @@ test("Environment, backend, SQL, tools and archives are never served", async t =
     const response = await fetch(origin + pathname);
     assert.equal(response.status, 200, pathname);
     if (!pathname.endsWith(".ttf")) assert.ok(!(await response.text()).includes(configured.SUPABASE_SECRET_KEY));
+  }
+});
+
+test("Privacy policy routes serve the public document without exposing the policy repository", async t => {
+  const { origin } = await site(t);
+  const document = await readFile(new URL("../policy.html", import.meta.url), "utf8");
+  for (const pathname of ["/policy", "/policy/", "/policy.html", "/policy?lang=en"]) {
+    const response = await fetch(origin + pathname);
+    assert.equal(response.status, 200, pathname);
+    assert.equal(response.headers.get("Content-Type"), "text/html; charset=utf-8");
+    assert.equal(await response.text(), document);
+  }
+  const head = await fetch(`${origin}/policy?lang=vi`, { method: "HEAD" });
+  assert.equal(head.status, 200);
+  assert.equal(head.headers.get("Content-Type"), "text/html; charset=utf-8");
+  assert.equal(await head.text(), "");
+  assert.equal((await fetch(`${origin}/policy`, { method: "POST" })).status, 405);
+  for (const pathname of ["/policy/README.md", "/policy/.git/config", "/policy/missing"]) {
+    assert.equal((await fetch(origin + pathname)).status, 404, pathname);
   }
 });
 

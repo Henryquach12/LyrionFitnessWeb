@@ -355,8 +355,11 @@ try {
       return link && link.textContent.trim() === 'Trở thành tester' && link.target === '_blank' && link.relList.contains('noopener') && document.querySelectorAll('.hero-actions a').length === 1;
     })()
   `));
-  check("Signup privacy text and final support contact match the requested copy", await evaluate(`
-    document.querySelector('.form-note').textContent.trim() === 'Email của bạn sẽ không bị chia sẻ cho bên thứ ba' &&
+  check("Signup explains email consent and links to the policy alongside support", await evaluate(`
+    document.querySelector('#waitlist-consent').textContent.includes('bạn đồng ý cho Lyrion sử dụng địa chỉ email của bạn để gửi thông tin về LyrionFitness') &&
+    document.querySelector('.waitlist-submit').getAttribute('aria-describedby') === 'waitlist-consent' &&
+    [...document.querySelectorAll('#waitlist-consent a,.site-footer .footer-policy')].length === 2 &&
+    [...document.querySelectorAll('#waitlist-consent a,.site-footer .footer-policy')].every(link => link.getAttribute('href') === '/policy' && link.target === '_blank' && link.relList.contains('noopener')) &&
     document.querySelector('.site-footer').textContent.includes('Mọi thông tin liên hệ: support@lyrionfitness.com') &&
     document.querySelector('.site-footer a[href="mailto:support@lyrionfitness.com"]') !== null
   `));
@@ -753,7 +756,8 @@ try {
   check("Tester guide anchor targets exist and external links protect the opener", await evaluate(`
     [...document.querySelectorAll('a[href^="#"]')].every(link => document.getElementById(link.getAttribute('href').slice(1))) &&
     [...document.querySelectorAll('a[target="_blank"]')].every(link => link.relList.contains('noopener')) &&
-    document.querySelector('.tester-support').textContent.trim() === 'Mọi thông tin liên hệ: support@lyrionfitness.com'
+    document.querySelector('.tester-support').textContent.trim() === 'Mọi thông tin liên hệ: support@lyrionfitness.com' &&
+    document.querySelector('.tester-footer .footer-policy').getAttribute('href') === '/policy'
   `));
   await checkGlassPreferences("Tester guide",
     '.tester-step,.tester-help-list section,.testflight-invitation,.testflight-current-apps,.feedback-stage .tester-mockup',

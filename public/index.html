@@ -206,10 +206,10 @@
             <div class="form-field"><label for="waitlist-name">Tên của bạn</label><input id="waitlist-name" name="name" type="text" autocomplete="name" minlength="2" maxlength="100" required placeholder="Bạn muốn Lyrion gọi mình là gì?"></div>
             <div class="form-field"><label for="waitlist-email">Địa chỉ email</label><input id="waitlist-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="ban@email.com"></div>
             <div class="form-trap" aria-hidden="true"><label for="waitlist-company">Để trống trường này</label><input id="waitlist-company" name="company" type="text" tabindex="-1" autocomplete="off"></div>
-            <button class="waitlist-submit" type="submit">Tham gia danh sách chờ</button>
+            <button class="waitlist-submit" type="submit" aria-describedby="waitlist-consent">Tham gia danh sách chờ</button>
           </fieldset>
           <p class="form-status" id="waitlist-status" role="status" aria-live="polite" aria-atomic="true"></p>
-          <p class="form-note">Email của bạn sẽ không bị chia sẻ cho bên thứ ba</p>
+          <p class="form-note form-consent" id="waitlist-consent">Bằng việc đăng ký, bạn đồng ý cho Lyrion sử dụng địa chỉ email của bạn để gửi thông tin về LyrionFitness. Xem <a href="/policy" target="_blank" rel="noopener noreferrer" aria-label="Chính sách bảo mật (mở trong tab mới)">Chính sách bảo mật</a>.</p>
         </form>
         <noscript><p class="form-note">Vui lòng bật JavaScript để đăng ký.</p></noscript>
       </div>
@@ -231,7 +231,10 @@
     <a class="brand" href="#top" aria-label="LyrionFitness, về đầu trang"><img src="assets/lyrion-mark.png" alt="" width="26" height="29"><span>Lyrion<span class="brand-light">Fitness</span></span></a>
     <p>Được thiết kế cho hành trình của bạn.</p>
     <span>© <span data-year>2026</span> LyrionFitness</span>
-    <small class="support-line">Mọi thông tin liên hệ: <a href="mailto:support@lyrionfitness.com">support@lyrionfitness.com</a></small>
+    <div class="footer-contact">
+      <small class="support-line">Mọi thông tin liên hệ: <a href="mailto:support@lyrionfitness.com">support@lyrionfitness.com</a></small>
+      <a class="footer-policy" href="/policy" target="_blank" rel="noopener noreferrer" aria-label="Chính sách bảo mật (mở trong tab mới)">Chính sách bảo mật</a>
+    </div>
   </footer>
 
   <dialog class="preview-dialog" aria-labelledby="preview-dialog-title">
